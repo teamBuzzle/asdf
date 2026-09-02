@@ -68,7 +68,7 @@ The intent is that any CLI agent works, because they are just processes:
 | Styling | Tailwind CSS v4 |
 | Components | shadcn/ui on Base UI (`base-nova` preset) |
 | Icons | lucide-react |
-| i18n | i18next + react-i18next |
+| i18n | i18next + react-i18next (en, ko, zh-CN, ja, es, pt-BR, ru) |
 | State helpers | immer |
 | Validation | zod |
 | Control flow | ts-pattern |

@@ -1,0 +1,10 @@
+{
+	"app": { "title": "asdf" },
+	"workspace": {
+		"open": "打开",
+		"pathLabel": "工作区路径",
+		"idle": "请选择要打开的文件夹。",
+		"opening": "正在打开…"
+	},
+	"notes": { "title": "笔记" }
+}

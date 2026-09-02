@@ -25,8 +25,31 @@ readers.
 Chat with the user stays in whatever language the user writes. Only artifacts
 that land in the repository or on GitHub are English.
 
-Never hardcode user-facing text in a component. Add a key to `src/app/i18n.ts`
-and read it with `t()`. That file is the one place non-English strings belong.
+Never hardcode user-facing text in a component. Add a key to
+`src/app/locales/en.json`, translate it in the other locale files, and read it
+with `t()`. Those files are the only place non-English text belongs.
+
+### Shipped locales
+
+| Locale | Why |
+|---|---|
+| `en` | Default and fallback. Also covers India, the second-largest developer population, which works in English. |
+| `ko` | Team language |
+| `zh-CN` | China — top 5 developer population |
+| `ja` | Japan |
+| `es` | Spanish |
+| `pt-BR` | Brazil — top 5 developer population |
+| `ru` | Russia — top 5 developer population |
+
+That set is closed. The rule was: English, Korean, Chinese, Japanese, Spanish,
+plus whatever the five countries with the most developers need. Those five are
+the United States, India, China, Brazil and Russia, which the list above covers,
+so no further language is added without a new decision.
+
+Regional variants are resolved by i18next rather than shipped: `en-GB` falls to
+`en` via `nonExplicitSupportedLngs`, and `pt-PT` and `zh-TW` are mapped onto
+`pt-BR` and `zh-CN` by the `fallbackLng` map in `src/app/i18n.ts`. Every locale
+file must carry the same key set as `en.json`.
 
 ## Commands
 
