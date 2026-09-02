@@ -2,6 +2,12 @@
 	"name": "goldeye",
 	"private": true,
 	"version": "0.1.0",
+	"description": "Agentic development environment for running coding agents like Claude Code and Codex in parallel, each in its own git worktree.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/teamBuzzle/asdf.git"
+	},
 	"type": "module",
 	"scripts": {
 		"dev": "vite",

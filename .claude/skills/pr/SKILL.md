@@ -1,0 +1,160 @@
+---
+name: pr
+description: Create a GitHub Pull Request with auto-detected base branch, type/mode labels, self-assign, and auto-reviewer selection. Use when the user says "pr", "PR 만들어", "풀리퀘", or wants to create a pull request.
+---
+
+Create a GitHub Pull Request for the current branch with full automation.
+
+## Steps
+
+### 1. Gather branch info
+
+Run these commands in parallel:
+
+```bash
+# Current branch name
+git rev-parse --abbrev-ref HEAD
+
+# Detect the base branch (where this branch was created from)
+git log --oneline --decorate --all --ancestry-path HEAD..main --merges 2>/dev/null | head -1
+# Fallback: find the merge-base with main
+git merge-base HEAD main
+
+# Get the current user's GitHub username
+gh api user --jq '.login'
+
+# Get all repo collaborators (excluding yourself) for reviewer assignment
+gh api repos/{owner}/{repo}/collaborators --jq '.[].login'
+
+# Check if there are unpushed commits
+git status
+git log --oneline origin/$(git rev-parse --abbrev-ref HEAD)..HEAD 2>/dev/null
+```
+
+Determine the **base branch**: Use `git merge-base --fork-point main HEAD` or `git merge-base main HEAD` to find where the current branch diverged from. The base branch is `main` unless the branch was created from another feature branch (detect via branch naming or merge-base).
+
+### 2. Analyze changes
+
+```bash
+# All commits on this branch since diverging from base
+git log --oneline $(git merge-base main HEAD)..HEAD
+
+# Full diff against base
+git diff $(git merge-base main HEAD)..HEAD --stat
+git diff $(git merge-base main HEAD)..HEAD
+```
+
+Read all the commits and the diff carefully to understand:
+
+- What was changed and why
+- The scope and risk of the changes
+- Whether tests, lint, or build were affected
+
+### 3. Select labels
+
+Based on the commit messages and changes, select exactly **one `type:*` label** and **one `mode:*` label**.
+
+**Type labels** (pick one):
+| Label | When to use |
+|---|---|
+| `type:fix` | Fixes broken expected behavior |
+| `type:feat` | Adds new functionality or user value |
+| `type:refactor` | Improves internal structure without behavior change |
+| `type:chore` | Config, dependencies, CI, maintenance |
+| `type:docs` | Documentation changes |
+| `type:test` | Test code additions or improvements |
+| `type:style` | Formatting, no code logic change |
+| `type:ci` | CI/CD pipeline changes |
+| `type:perf` | Performance improvement |
+
+**Mode labels** (pick one):
+| Label | When to use |
+|---|---|
+| `mode:ai` | AI drove the work |
+| `mode:human` | Human drove the work |
+| `mode:mixed` | Both AI and human contributed substantially |
+
+Determine the mode label by examining commit messages and the conversation context. If commits contain `Co-Authored-By: Claude` or similar AI indicators, lean toward `mode:ai` or `mode:mixed`. If unsure, ask the user.
+
+### 4. Fill PR template
+
+Use the repository's PR template at `.github/pull_request_template.md`:
+
+```markdown
+## Summary
+
+<!-- Describe what this PR changes, in Korean -->
+
+<!-- 연결된 이슈가 있으면 `Ref #12`. Acceptance를 전부 만족할 때만 `Closes #12`. -->
+
+## Impact
+
+- Scope: <!-- affected area: e.g., 교사 관리, 일일 보고서 -->
+- Risk: <!-- low / medium / high -->
+- Rollback: <!-- how to revert if needed -->
+
+## Checks
+
+- Tests: <!-- pass / fail / not applicable -->
+- Lint/Build: <!-- pass / fail -->
+- Preview: <!-- link or N/A -->
+- Evidence: <!-- screenshots, test output, etc. -->
+
+## Review Focus
+
+- <!-- Key areas reviewers should focus on -->
+```
+
+Fill in all sections based on your analysis. Write in Korean for user-facing text.
+
+### 5. Push and create PR
+
+```bash
+# Push current branch if needed (with upstream tracking)
+git push -u origin $(git rev-parse --abbrev-ref HEAD)
+
+# Create PR with:
+# - base branch = detected base
+# - labels = one type + one mode
+# - assignee = current user (self)
+# - reviewer = collaborators excluding self (if available)
+gh pr create \
+  --base <base-branch> \
+  --title "<concise title in Korean, under 70 chars>" \
+  --body "$(cat <<'EOF'
+<filled template content>
+EOF
+)" \
+  --label "type:<type>" \
+  --label "mode:<mode>" \
+  --assignee "@me" \
+  --reviewer "<other-collaborators>"
+```
+
+**Reviewer selection rules:**
+
+- Get all repo collaborators via `gh api repos/{owner}/{repo}/collaborators --jq '.[].login'`
+- Exclude the current user (`@me` / your own login)
+- Add all remaining collaborators as reviewers
+- If no other collaborators exist, skip `--reviewer` flag
+
+### 6. Report result
+
+After creating the PR, output:
+
+- PR URL
+- Selected labels
+- Assigned reviewers
+- A brief summary of what was included
+
+## Important rules
+
+- ALWAYS detect the base branch from git history, do not assume `main`
+- ALWAYS select exactly one `type:` and one `mode:` label
+- ALWAYS assign self as assignee
+- ALWAYS add other collaborators as reviewers (if any exist)
+- ALWAYS use the PR template from `.github/pull_request_template.md`
+- ALWAYS write PR title and summary content in Korean
+- Link the GitHub issue with `Ref #<n>` in the body. Use `Closes #<n>` only when the PR satisfies every acceptance item on that issue
+- If the branch has no commits ahead of base, warn the user and do not create the PR
+- If there are uncommitted changes, warn the user before proceeding
