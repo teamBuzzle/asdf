@@ -1,0 +1,4 @@
+# The repository stores LF. Without this, Git for Windows checks out CRLF by
+# default (core.autocrlf=true in its system gitconfig) and biome reports every
+# file as unformatted, while CI on macOS sees none of it.
+* text=auto eol=lf
