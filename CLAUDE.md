@@ -1,4 +1,4 @@
-# goldeye
+# asdf
 
 An agentic development environment (ADE): a Tauri 2 + React 19 desktop app for
 running coding agents such as Claude Code, Codex and Gemini CLI against

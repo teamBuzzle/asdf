@@ -1,6 +1,6 @@
 <div align="center">
 
-# goldeye
+# asdf
 
 **An agentic development environment.**
 
@@ -37,7 +37,7 @@ the reviewing. Different assumption, different primitives:
 | The human's job | Writing | Reviewing and steering |
 | What needs to be visible | Code and errors | What the agent did, and why |
 
-goldeye is built around the second column.
+asdf is built around the second column.
 
 ## Planned
 

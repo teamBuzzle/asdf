@@ -8,7 +8,7 @@ i18n.use(initReactI18next).init({
 	resources: {
 		en: {
 			translation: {
-				app: { title: "goldeye" },
+				app: { title: "asdf" },
 				workspace: {
 					open: "Open",
 					pathLabel: "Workspace path",
@@ -20,7 +20,7 @@ i18n.use(initReactI18next).init({
 		},
 		ko: {
 			translation: {
-				app: { title: "goldeye" },
+				app: { title: "asdf" },
 				workspace: {
 					open: "열기",
 					pathLabel: "워크스페이스 경로",
