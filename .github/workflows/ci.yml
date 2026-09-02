@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    # macOS so the Tauri crate builds without the Linux webkit2gtk system packages.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm knip
+      # The Tauri crate reads ../dist at build time, so build the frontend first.
+      - run: pnpm build
+
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+      - run: pnpm rust:lint
+      - run: pnpm rust:test

@@ -1,0 +1,10 @@
+{
+	"app": { "title": "asdf" },
+	"workspace": {
+		"open": "열기",
+		"pathLabel": "워크스페이스 경로",
+		"idle": "열 폴더를 선택하세요.",
+		"opening": "여는 중…"
+	},
+	"notes": { "title": "노트" }
+}

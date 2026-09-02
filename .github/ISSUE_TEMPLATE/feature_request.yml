@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest something asdf should be able to do.
+labels: ["type:feat"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that asdf makes hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: Describe the behaviour you want. A rough sketch is fine.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance
+      description: What has to be true for this to be done?
+      value: |
+        - [ ] 

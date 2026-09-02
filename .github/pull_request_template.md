@@ -1,20 +1,29 @@
 ## Summary
 
-<!-- 이 PR이 변경하는 내용을 간결하게 설명 -->
+<!-- English. What this pull request changes, and why. -->
+<!-- Link the issue with `Ref #12`. Use `Closes #12` only if this PR satisfies
+     every acceptance item on that issue. -->
+
+<details>
+<summary>🇰🇷 한국어</summary>
+
+<!-- 위 내용과 같은 설명을 한국어로. 번역이 아니라 같은 내용을 한국어로 쓴 것. -->
+
+</details>
 
 ## Impact
 
-- Scope: <!-- 영향 범위: e.g., ipc 레이어, workspace feature, Tauri 셸 -->
+- Scope: <!-- affected area, e.g. ipc layer, workspace feature, Tauri shell -->
 - Risk: <!-- low / medium / high -->
-- Rollback: <!-- 되돌리는 방법 -->
+- Rollback: <!-- how to revert -->
 
 ## Checks
 
 - Tests: <!-- pass / fail / not applicable -->
 - Lint/Build: <!-- pass / fail -->
-- Preview: <!-- 링크 or N/A -->
-- Evidence: <!-- 스크린샷, 테스트 결과 등 -->
+- Preview: <!-- link or N/A -->
+- Evidence: <!-- screenshots, command output -->
 
 ## Review Focus
 
-- <!-- 리뷰어가 집중해서 봐야 할 부분 -->
+- <!-- What reviewers should look at closely -->

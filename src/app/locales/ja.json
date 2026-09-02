@@ -1,0 +1,10 @@
+{
+	"app": { "title": "asdf" },
+	"workspace": {
+		"open": "開く",
+		"pathLabel": "ワークスペースのパス",
+		"idle": "開くフォルダーを選択してください。",
+		"opening": "開いています…"
+	},
+	"notes": { "title": "メモ" }
+}

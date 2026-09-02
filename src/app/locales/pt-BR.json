@@ -1,0 +1,10 @@
+{
+	"app": { "title": "asdf" },
+	"workspace": {
+		"open": "Abrir",
+		"pathLabel": "Caminho do espaço de trabalho",
+		"idle": "Escolha uma pasta para abrir.",
+		"opening": "Abrindo…"
+	},
+	"notes": { "title": "Notas" }
+}

@@ -78,8 +78,6 @@ Analyze the staged changes and generate a commitlint-compliant commit message.
 <type>(<optional scope>): <description>
 
 <optional body>
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 ```
 
 **Type prefixes:**
@@ -97,21 +95,21 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 
 **Commit message rules:**
 
-- Description in Korean, lowercase start (after type prefix)
+- Description in English, lowercase start (after the type prefix)
 - Keep the subject line under 100 characters
-- Use imperative mood in English type prefix, descriptive in Korean
-- Scope is optional but recommended for clarity (e.g., `feat(teachers): 교사 검색 기능 추가`)
+- Imperative mood: "add", not "added" or "adds"
+- Scope is optional but recommended for clarity (e.g. `feat(workspace): add recent list`)
 - Body is optional — use for complex changes that need explanation
-- Always end with `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`
+- Do not add a `Co-Authored-By:` trailer unless a local rule asks for one; `CLAUDE.local.md` may forbid it outright
 
 **Examples:**
 
 ```
-feat: 교사 검색 기능 추가
-fix(auth): 로그인 리다이렉트 오류 수정
-refactor: API 레이어 repository 패턴으로 전환
-chore: ESLint 설정 업데이트
-docs: README 프로젝트 구조 설명 추가
+feat: add workspace recent list
+fix(ipc): normalize thrown errors into IpcResult
+refactor: move terminal state out of React
+chore: bump tauri to 2.11
+docs: describe the layer boundaries in README
 ```
 
 생성된 커밋 메시지를 표시하고 바로 진행한다. 확인을 묻지 않는다.
@@ -166,8 +164,6 @@ pnpm build
 ```bash
 git commit -m "$(cat <<'EOF'
 <confirmed commit message>
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -209,4 +205,4 @@ Example:
 - NEVER use `--no-verify` to skip hooks
 - NEVER use `--amend` — always create new commits
 - If pre-commit hook fails, fix the issue and create a NEW commit
-- Korean for description, English for type prefix
+- English only. Commit messages are public and permanent; see the Language section of CLAUDE.md

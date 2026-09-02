@@ -23,7 +23,7 @@ git merge-base HEAD main
 # Get the current user's GitHub username
 gh api user --jq '.login'
 
-# Get all repo collaborators (excluding yourself) for reviewer assignment
+# Pick the reviewer: one of the review pool at random, excluding yourself
 gh api repos/{owner}/{repo}/collaborators --jq '.[].login'
 
 # Check if there are unpushed commits
@@ -83,13 +83,20 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 ```markdown
 ## Summary
 
-<!-- Describe what this PR changes, in Korean -->
+<!-- English. Describe what this PR changes and why. -->
+<!-- Link the issue with `Ref #12`. Use `Closes #12` only when this PR
+     satisfies every acceptance item on that issue. -->
 
-<!-- 연결된 이슈가 있으면 `Ref #12`. Acceptance를 전부 만족할 때만 `Closes #12`. -->
+<details>
+<summary>🇰🇷 한국어</summary>
+
+<!-- The same explanation in Korean. -->
+
+</details>
 
 ## Impact
 
-- Scope: <!-- affected area: e.g., 교사 관리, 일일 보고서 -->
+- Scope: <!-- affected area, e.g. ipc layer, workspace feature, Tauri shell -->
 - Risk: <!-- low / medium / high -->
 - Rollback: <!-- how to revert if needed -->
 
@@ -105,7 +112,22 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 - <!-- Key areas reviewers should focus on -->
 ```
 
-Fill in all sections based on your analysis. Write in Korean for user-facing text.
+Fill in all sections based on your analysis.
+
+**The Summary section is bilingual. Everything else is English only.**
+
+GitHub markdown has no tabs, so the Korean version goes in a `<details>` block
+directly under the English one — collapsed by default, one click to open.
+
+- Write the English summary first, then the Korean one.
+- The Korean block is not a translation of the English sentences; it is the same
+  explanation written natively in Korean. Same facts, same structure, same level
+  of detail. Do not let one side carry information the other lacks.
+- Keep the `<summary>🇰🇷 한국어</summary>` line exactly as it is, so every pull
+  request looks the same.
+- Leave a blank line after `<details>` and before `</details>`, or GitHub will
+  not render the markdown inside the block.
+- Title, Impact, Checks and Review Focus stay English only.
 
 ### 5. Push and create PR
 
@@ -120,7 +142,7 @@ git push -u origin $(git rev-parse --abbrev-ref HEAD)
 # - reviewer = collaborators excluding self (if available)
 gh pr create \
   --base <base-branch> \
-  --title "<concise title in Korean, under 70 chars>" \
+  --title "<concise title in English, under 70 chars>" \
   --body "$(cat <<'EOF'
 <filled template content>
 EOF
@@ -128,15 +150,33 @@ EOF
   --label "type:<type>" \
   --label "mode:<mode>" \
   --assignee "@me" \
-  --reviewer "<other-collaborators>"
+  --reviewer "$REVIEWER"
 ```
 
 **Reviewer selection rules:**
 
-- Get all repo collaborators via `gh api repos/{owner}/{repo}/collaborators --jq '.[].login'`
-- Exclude the current user (`@me` / your own login)
-- Add all remaining collaborators as reviewers
-- If no other collaborators exist, skip `--reviewer` flag
+The review pool is fixed:
+
+```
+devxian96
+Hayoung0708
+```
+
+- Drop the pull request author from the pool. A person cannot review their own
+  pull request, and `main` requires one approving review, so assigning the
+  author would deadlock the merge.
+- Pick **one** name from what is left, at random. Do not always pick the first.
+- Assign exactly that one reviewer. Do not add the rest of the repository's
+  collaborators — they are not on the review rota.
+- If the pool is empty after dropping the author, skip the `--reviewer` flag and
+  say so in the report, because the pull request cannot be merged until someone
+  outside the pool approves it.
+
+```bash
+# Pool minus the author, one at random
+POOL=$(printf 'devxian96\nHayoung0708\n' | grep -vx "$(gh api user --jq .login)")
+REVIEWER=$(printf '%s\n' "$POOL" | sort -R | head -1)
+```
 
 ### 6. Report result
 
@@ -152,9 +192,11 @@ After creating the PR, output:
 - ALWAYS detect the base branch from git history, do not assume `main`
 - ALWAYS select exactly one `type:` and one `mode:` label
 - ALWAYS assign self as assignee
-- ALWAYS add other collaborators as reviewers (if any exist)
+- ALWAYS assign exactly one reviewer, chosen at random from the review pool minus the author
 - ALWAYS use the PR template from `.github/pull_request_template.md`
-- ALWAYS write PR title and summary content in Korean
+- ALWAYS write the PR title in English
+- ALWAYS write the Summary section twice: English, then Korean inside the
+  `<details>` block. Every other section is English only
 - Link the GitHub issue with `Ref #<n>` in the body. Use `Closes #<n>` only when the PR satisfies every acceptance item on that issue
 - If the branch has no commits ahead of base, warn the user and do not create the PR
 - If there are uncommitted changes, warn the user before proceeding

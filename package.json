@@ -1,5 +1,5 @@
 {
-	"name": "goldeye",
+	"name": "asdf",
 	"private": true,
 	"version": "0.1.0",
 	"description": "Agentic development environment for running coding agents like Claude Code and Codex in parallel, each in its own git worktree.",
@@ -66,5 +66,9 @@
 			"esbuild",
 			"@biomejs/biome"
 		]
+	},
+	"packageManager": "pnpm@10.14.0",
+	"engines": {
+		"node": ">=22"
 	}
 }
