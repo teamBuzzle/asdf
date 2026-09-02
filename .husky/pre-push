@@ -1,1 +1,2 @@
 pnpm rust:lint
+pnpm rust:test

@@ -37,5 +37,124 @@
 				"organizeImports": "on"
 			}
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["src/features/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@/features/**"],
+										"message": "Features must not import each other. Use a relative path inside your own feature, or promote the shared part to src/components or src/lib."
+									},
+									{
+										"group": ["@/app/**"],
+										"message": "Features must not import the app shell. Dependencies point downward only."
+									},
+									{
+										"group": ["@tauri-apps/**"],
+										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+									},
+									{
+										"group": ["../../**"],
+										"message": "Escaping two levels up crosses a layer. Import through the '@/' alias instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/components/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@/features/**", "@/app/**", "@/ipc/**"],
+										"message": "Shared components must stay presentational: no features, no app shell, no IPC."
+									},
+									{
+										"group": ["@tauri-apps/**"],
+										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+									},
+									{
+										"group": ["../../**"],
+										"message": "Escaping two levels up crosses a layer. Import through the '@/' alias instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/lib/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": [
+											"@/features/**",
+											"@/app/**",
+											"@/components/**",
+											"@/ipc/**"
+										],
+										"message": "src/lib is for pure helpers. It must not depend on any other layer."
+									},
+									{
+										"group": ["@tauri-apps/**"],
+										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+									},
+									{
+										"group": ["../../**"],
+										"message": "Escaping two levels up crosses a layer. Import through the '@/' alias instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["src/ipc/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["@/features/**", "@/app/**", "@/components/**"],
+										"message": "The IPC layer is the bottom of the stack. It must not reach back up."
+									},
+									{
+										"group": ["../../**"],
+										"message": "Escaping two levels up crosses a layer. Import through the '@/' alias instead."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	]
 }

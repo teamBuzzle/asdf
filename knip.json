@@ -1,6 +1,5 @@
 {
 	"$schema": "https://unpkg.com/knip@6/schema.json",
 	"ignore": ["src/components/ui/**"],
-	"ignoreDependencies": ["@tauri-apps/api"],
 	"ignoreBinaries": ["rustfmt"]
 }

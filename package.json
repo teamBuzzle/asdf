@@ -14,7 +14,8 @@
 		"knip": "knip",
 		"rust:fmt": "cargo fmt --manifest-path src-tauri/Cargo.toml",
 		"rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
-		"prepare": "husky"
+		"prepare": "husky",
+		"rust:test": "cargo test --manifest-path src-tauri/Cargo.toml"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.7.0",
