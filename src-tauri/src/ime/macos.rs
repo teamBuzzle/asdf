@@ -68,6 +68,16 @@ fn is_composing_source(id: &str) -> bool {
     COMPOSED.iter().any(|prefix| id.starts_with(prefix))
 }
 
+/// Whether the callbacks should forward anything right now.
+///
+/// The client view sits in the responder chain with an activated text input
+/// context, so AppKit delivers text to it even for keystrokes the monitor
+/// deliberately passed through to the webview. Without this check those arrive
+/// twice: once from here and once from xterm.
+fn should_forward() -> bool {
+    is_composing_source(&current_input_source())
+}
+
 /// Delivers `(event name, payload)` to the frontend.
 type Sink = Box<dyn Fn(&str, &str)>;
 
@@ -92,6 +102,9 @@ define_class!(
             trace(format_args!("insertText {text:?}"));
             let mut state = self.ivars().borrow_mut();
             state.marked.clear();
+            if !should_forward() {
+                return;
+            }
             if let Some(sink) = state.sink.as_ref() {
                 sink(PREEDIT_EVENT, "");
                 if !text.is_empty() {
@@ -106,6 +119,9 @@ define_class!(
             trace(format_args!("setMarkedText {text:?}"));
             let mut state = self.ivars().borrow_mut();
             state.marked = text.clone();
+            if !should_forward() {
+                return;
+            }
             if let Some(sink) = state.sink.as_ref() {
                 sink(PREEDIT_EVENT, &text);
             }
@@ -173,6 +189,9 @@ define_class!(
 
         #[unsafe(method(doCommandBySelector:))]
         fn do_command(&self, selector: Sel) {
+            if !should_forward() {
+                return;
+            }
             // While a CJK source is active the event never reaches the webview,
             // so the keys the IME declines have to be translated here.
             let sequence = match selector.name().to_str().unwrap_or_default() {
