@@ -1,5 +1,5 @@
 export default {
-	"*.{ts,tsx,js,jsx,json,html}": [
+	"*.{ts,tsx,js,jsx,mjs,cjs,json,html}": [
 		"biome check --write --no-errors-on-unmatched",
 	],
 	"*.rs": ["rustfmt --edition 2021"],

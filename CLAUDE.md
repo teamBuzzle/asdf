@@ -69,11 +69,16 @@ request creation. The skills apply commitlint, branch
 naming, the PR template, reviewer assignment, label assignment and the main
 branch guard in one step; calling the CLI directly bypasses all of it.
 
-| Task | Skill |
-|---|---|
-| New branch | `/new` |
-| Commit and push | `/commit-push` |
-| Create a pull request | `/pr` |
+| Step | Task | Skill |
+|---|---|---|
+| 1 | Open the issue | `gh issue create` |
+| 2 | New branch | `/new` |
+| 3 | Commit and push | `/commit-push` |
+| 4 | Create a pull request | `/pr` |
+
+Run them in that order. Step 1 is not a skill because there is nothing to
+automate around it, and it is the one step that does not apply to every change —
+see Issues below for when it is needed. Steps 2 to 4 always apply.
 
 **Never commit or push to `main`.** It is protected on GitHub: pull requests are
 required, force pushes and deletions are blocked, and the rule applies to
@@ -108,8 +113,25 @@ are not on the rota and are not auto-assigned.
 
 This repository does not use Linear. Work is tracked in GitHub Issues.
 
-- If a change touches files, find the issue first; if none exists, create one
-  and start. Do not ask — create it.
+- **Not every change needs one.** An issue carries what a diff cannot: why this,
+  why now, why not the obvious alternative. When the diff and the commit message
+  already say everything there is to say, an issue adds a number and nothing
+  else. Skip it for a typo, a dead link, a formatting pass, a dependency bump, a
+  rename, a one-line fix nobody would argue with.
+- **Write one** when the change is a decision someone could reasonably disagree
+  with, when the work will outlive a single pull request, when someone reported
+  it, or when a reader a month from now would ask why it is like this. When it
+  is genuinely unclear, write it — an unnecessary issue costs a minute, a
+  missing one costs a decision nobody can reconstruct.
+- When the work does need an issue, write it **before the first edit**. Do not
+  ask, and do not defer it to the end of the task — an issue written from a
+  finished diff describes the diff, which is the one thing the diff already did.
+- One issue per concern, not per commit and not per pull request. A branch that
+  fixes two unrelated things gets two issues and links both; a branch that lands
+  one concern in six commits gets one.
+- Write the issue as if the reader has not seen the diff: what is wrong today,
+  what should be true instead, and an `Acceptance` list specific enough that
+  someone else could tell whether it is done.
 - Issues use the forms in `.github/ISSUE_TEMPLATE/`, which apply the `type:*` label automatically.
 - **Link the issue from the pull request body with `Ref #12`.**
 - Use `Closes #12` only when the pull request satisfies every acceptance item on

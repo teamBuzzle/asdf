@@ -1,6 +1,6 @@
 [package]
 name = "asdf"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agentic development environment for running coding agents like Claude Code and Codex in parallel, each in its own git worktree."
 authors = ["teamBuzzle"]
 edition = "2021"
