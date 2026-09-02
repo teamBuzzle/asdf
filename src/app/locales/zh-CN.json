@@ -2,15 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "打开",
-		"pathLabel": "工作区路径",
-		"idle": "请选择要打开的文件夹。",
-		"opening": "正在打开…"
-	},
-	"notes": {
-		"title": "笔记"
-	},
 	"update": {
 		"chip": {
 			"available": "更新 {{version}}",
@@ -58,5 +49,10 @@
 			"close": "关闭",
 			"openRelease": "打开发布页"
 		}
+	},
+	"terminal": {
+		"starting": "正在启动 shell…",
+		"failed": "无法启动 shell。",
+		"exited": "shell 已退出。"
 	}
 }

@@ -1,31 +1,26 @@
-import { Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { NotesEditor } from "@/features/notes/components/NotesEditor";
+import { TerminalPane } from "@/features/terminal/components/TerminalPane";
 import { UpdateChip } from "@/features/updater/components/UpdateChip";
 import { UpdateDialog } from "@/features/updater/components/UpdateDialog";
 import { useUpdater } from "@/features/updater/use-updater";
-import { WorkspaceOpener } from "@/features/workspace/components/WorkspaceOpener";
 
 export function App() {
 	const { t } = useTranslation();
 	const updater = useUpdater();
 
 	return (
-		<main className="mx-auto flex max-w-xl flex-col gap-6 p-8">
-			{/* The update chip lives here until there is a status bar to hold it. */}
-			<header className="flex items-center justify-between gap-2">
-				<h1 className="flex items-center gap-2 font-heading text-2xl">
-					<Terminal className="size-5" />
-					{t("app.title")}
-				</h1>
+		// grid-rows-[1fr_auto] pins the status bar: the terminal gets exactly the
+		// remaining height rather than being free to overflow past it.
+		<div className="grid h-dvh grid-rows-[1fr_auto] overflow-hidden bg-background">
+			<TerminalPane />
+
+			<footer className="relative z-10 flex items-center justify-between gap-2 border-t bg-background px-3 py-1">
+				<span className="text-muted-foreground text-xs">{t("app.title")}</span>
 				<UpdateChip
 					state={updater.state}
 					onOpen={() => updater.setOpen(true)}
 				/>
-			</header>
-
-			<WorkspaceOpener />
-			<NotesEditor />
+			</footer>
 
 			<UpdateDialog
 				state={updater.state}
@@ -36,6 +31,6 @@ export function App() {
 				onInstallOnQuit={updater.installOnQuit}
 				onRetry={() => void updater.runCheck(true)}
 			/>
-		</main>
+		</div>
 	);
 }

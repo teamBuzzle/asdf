@@ -26,4 +26,11 @@ async function call<T>(
 export const ipc = {
 	openWorkspace: (path: string) =>
 		call<WorkspaceInfo>("open_workspace", { path }),
+	openTerminal: (cwd: string | null, cols: number, rows: number) =>
+		call<number>("open_terminal", { cwd, cols, rows }),
+	writeTerminal: (id: number, data: string) =>
+		call<void>("write_terminal", { id, data }),
+	resizeTerminal: (id: number, cols: number, rows: number) =>
+		call<void>("resize_terminal", { id, cols, rows }),
+	closeTerminal: (id: number) => call<void>("close_terminal", { id }),
 };

@@ -2,15 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "Abrir",
-		"pathLabel": "Caminho do espaço de trabalho",
-		"idle": "Escolha uma pasta para abrir.",
-		"opening": "Abrindo…"
-	},
-	"notes": {
-		"title": "Notas"
-	},
 	"update": {
 		"chip": {
 			"available": "Atualizar para {{version}}",
@@ -58,5 +49,10 @@
 			"close": "Fechar",
 			"openRelease": "Abrir a página da versão"
 		}
+	},
+	"terminal": {
+		"starting": "Iniciando o shell…",
+		"failed": "Não foi possível iniciar o shell.",
+		"exited": "O shell foi encerrado."
 	}
 }
