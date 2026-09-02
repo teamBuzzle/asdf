@@ -81,10 +81,21 @@ The intent is that any CLI agent works, because they are just processes:
 - Node 22+ and [pnpm](https://pnpm.io)
 - [Rust](https://rustup.rs) stable, with the `clippy` and `rustfmt` components
 - Xcode Command Line Tools (macOS)
+- Visual Studio Build Tools 2022 with the "Desktop development with C++"
+  workload (Windows) — Rust links against the MSVC toolchain
 
 ```sh
 rustup component add clippy rustfmt
 ```
+
+On a machine that has Node but is otherwise fresh, one command installs all of
+the above and then the project dependencies:
+
+```sh
+node scripts/bootstrap.mjs
+```
+
+Open a new terminal afterwards so the updated `PATH` applies.
 
 ### Run
 
