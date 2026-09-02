@@ -69,11 +69,16 @@ request creation. The skills apply commitlint, branch
 naming, the PR template, reviewer assignment, label assignment and the main
 branch guard in one step; calling the CLI directly bypasses all of it.
 
-| Task | Skill |
-|---|---|
-| New branch | `/new` |
-| Commit and push | `/commit-push` |
-| Create a pull request | `/pr` |
+| Step | Task | Skill |
+|---|---|---|
+| 1 | Open the issue | `gh issue create` |
+| 2 | New branch | `/new` |
+| 3 | Commit and push | `/commit-push` |
+| 4 | Create a pull request | `/pr` |
+
+Run them in that order. Step 1 is not a skill because there is nothing to
+automate around it — but it is not optional either, and skipping it is the
+failure this table exists to prevent.
 
 **Never commit or push to `main`.** It is protected on GitHub: pull requests are
 required, force pushes and deletions are blocked, and the rule applies to
@@ -108,8 +113,16 @@ are not on the rota and are not auto-assigned.
 
 This repository does not use Linear. Work is tracked in GitHub Issues.
 
-- If a change touches files, find the issue first; if none exists, create one
-  and start. Do not ask — create it.
+- **Before the first edit**, search for the issue that covers the work. If none
+  exists, write one and start. Do not ask, do not defer it to the end of the
+  task, and do not skip it because the change looks small — the issue is what
+  says why the change happened, and nobody reconstructs that from a diff a
+  month later.
+- One issue per concern. A branch that fixes two unrelated things gets two
+  issues, and the pull request links both.
+- Write the issue as if the reader has not seen the diff: what is wrong today,
+  what should be true instead, and an `Acceptance` list specific enough that
+  someone else could tell whether it is done.
 - Issues use the forms in `.github/ISSUE_TEMPLATE/`, which apply the `type:*` label automatically.
 - **Link the issue from the pull request body with `Ref #12`.**
 - Use `Closes #12` only when the pull request satisfies every acceptance item on
