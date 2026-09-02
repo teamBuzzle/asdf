@@ -84,6 +84,8 @@ particular call. Four attempts are recorded here so nobody repeats them:
 | Query the input source differently (`currentInputContext`, then Carbon TIS) | The source was always reported correctly; this was never the problem |
 | Have the user click the terminal before typing | No effect |
 | Take first responder while a CJK source is active, so AppKit binds the context | Binding is not synchronous enough to help the keystroke that triggers it, and holding first responder stops the webview receiving anything — English input broke entirely. Reverted. |
+| Bounce first responder to the client and straight back on `NSWindowDidBecomeKey`, betting the session outlives the focus change | The webview kept working, but the session was not established: the first key still arrived uncomposed |
+| Spend the handshake on a synthetic *mouse* event, which carries no characters or modifiers to strand | No effect. A mouse event does not establish the session |
 
 Apple's documentation explains why: an input context binds to its client, and
 the input method session is established, when that client **becomes first
@@ -91,10 +93,16 @@ responder in the key window**. Ghostty, Alacritty and WezTerm avoid this because
 their view is the first responder. Ours is not, so `activate()` is only a partial
 substitute and the session is created lazily on the first `handleEvent`.
 
-Taking first responder was tried and reverted (see the table). Doing it properly
-means holding it permanently and reimplementing everything xterm does with a
-keystroke — control chords, tab completion, history search — which is a large,
-risky change for one character at session start.
+Seven attempts are recorded above. The pattern across them: the session is
+established only by a real keystroke reaching `handleEvent`, and that keystroke
+is consumed doing it. Nothing that is not a real keystroke — synthetic key
+events, mouse events, focus changes, `activate()` — substitutes for it.
+
+The remaining option is to hold first responder permanently and reimplement
+everything xterm does with a keystroke: control chords, tab completion, history
+search, every escape sequence. That is a large, risky change for one character
+at session start, and it trades a cosmetic defect for a class of functional
+ones. Do not start it without deciding that trade deliberately.
 
 `ASDF_IME_TRACE=1` logs every callback; `scripts/ime-check.sh` drives real
 keystrokes through the IME and asserts what the pty received. Reach for the trace
