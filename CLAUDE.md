@@ -41,8 +41,8 @@ pnpm rust:test                # cargo test
 
 ## Git and pull requests must go through the skills
 
-Do not run `git` or `gh` directly for branch creation, commit, push, pull
-request creation, or review handling. The skills apply commitlint, branch
+Do not run `git` or `gh` directly for branch creation, commit, push, or pull
+request creation. The skills apply commitlint, branch
 naming, the PR template, reviewer assignment, label assignment and the main
 branch guard in one step; calling the CLI directly bypasses all of it.
 
@@ -51,8 +51,6 @@ branch guard in one step; calling the CLI directly bypasses all of it.
 | New branch | `/new` |
 | Commit and push | `/commit-push` |
 | Create a pull request | `/pr` |
-| Apply review feedback | `/pr-review-apply` |
-| Line-by-line PR review | `/pr-review` |
 
 **Never commit or push to `main`.** It is protected on GitHub: pull requests are
 required, force pushes and deletions are blocked, and the rule applies to
@@ -61,7 +59,7 @@ administrators. If a commit is requested while on `main`, create a branch with
 
 **Exception:** only when the user explicitly says to bypass the skills.
 
-Definitions live in `.claude/skills/{new,commit-push,pr,pr-review,pr-review-apply}/SKILL.md`.
+Definitions live in `.claude/skills/{new,commit-push,pr}/SKILL.md`.
 
 ## Labels
 
