@@ -36,6 +36,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm knip
+      - run: pnpm check:locales
       # The Tauri crate reads ../dist at build time, so build the frontend first.
       - run: pnpm build
 

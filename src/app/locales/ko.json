@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "열기",
 		"pathLabel": "워크스페이스 경로",
 		"idle": "열 폴더를 선택하세요.",
 		"opening": "여는 중…"
 	},
-	"notes": { "title": "노트" }
+	"notes": {
+		"title": "노트"
+	},
+	"update": {
+		"chip": {
+			"available": "업데이트 {{version}}",
+			"downloading": "업데이트 중… {{percent}}%",
+			"downloadingUnknown": "업데이트 중…",
+			"ready": "다시 시작하면 적용",
+			"error": "업데이트 실패",
+			"ariaAvailable": "업데이트 {{version}}이(가) 있습니다. 자세히 보기.",
+			"ariaDownloading": "업데이트 내려받는 중, {{percent}}퍼센트.",
+			"ariaReady": "업데이트 {{version}} 준비 완료. 자세히 보기.",
+			"ariaError": "업데이트 실패. 자세히 보기."
+		},
+		"available": {
+			"title": "업데이트가 있습니다",
+			"current": "현재 {{version}}을(를) 쓰고 있습니다",
+			"notesLabel": "{{version}} 변경 사항",
+			"notesEmpty": "이 버전의 변경 사항이 없습니다.",
+			"safe": "내려받아도 하던 일은 끊기지 않습니다.",
+			"later": "나중에",
+			"download": "내려받기"
+		},
+		"downloading": {
+			"title": "{{version}} 내려받는 중",
+			"pending": "내려받는 중…",
+			"progress": "{{total}} 중 {{received}}",
+			"keepsGoing": "창을 닫아도 계속 내려받습니다.",
+			"cancel": "취소",
+			"close": "닫기"
+		},
+		"ready": {
+			"title": "설치할 준비가 됐습니다",
+			"body": "{{version}}을(를) 내려받았습니다.",
+			"onQuit": "종료할 때 설치",
+			"restartNow": "지금 다시 시작",
+			"deferred": "asdf를 다음에 종료할 때 설치됩니다."
+		},
+		"error": {
+			"title": "업데이트 실패",
+			"titleBlocked": "업데이트가 중단됨",
+			"offline": "업데이트 서버에 연결하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.",
+			"download": "{{version}}을(를) 내려받지 못했습니다. 연결을 확인하고 다시 시도해 주세요.",
+			"install": "{{version}}을(를) 설치하지 못했습니다. 현재 버전은 그대로입니다.",
+			"signature": "이 업데이트를 검증하지 못했습니다. 내려받은 파일이 서명과 일치하지 않아 중단했습니다. 현재 버전은 그대로입니다.",
+			"retry": "다시 시도",
+			"close": "닫기",
+			"openRelease": "릴리스 페이지 열기"
+		}
+	}
 }

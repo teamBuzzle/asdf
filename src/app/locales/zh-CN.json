@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "打开",
 		"pathLabel": "工作区路径",
 		"idle": "请选择要打开的文件夹。",
 		"opening": "正在打开…"
 	},
-	"notes": { "title": "笔记" }
+	"notes": {
+		"title": "笔记"
+	},
+	"update": {
+		"chip": {
+			"available": "更新 {{version}}",
+			"downloading": "更新中… {{percent}}%",
+			"downloadingUnknown": "更新中…",
+			"ready": "重启以更新",
+			"error": "更新失败",
+			"ariaAvailable": "有更新 {{version}}。打开详情。",
+			"ariaDownloading": "正在下载更新，{{percent}}%。",
+			"ariaReady": "更新 {{version}} 已就绪。打开详情。",
+			"ariaError": "更新失败。打开详情。"
+		},
+		"available": {
+			"title": "有可用更新",
+			"current": "你当前是 {{version}}",
+			"notesLabel": "{{version}} 更新内容",
+			"notesEmpty": "该版本没有更新说明。",
+			"safe": "下载不会打断任何工作。",
+			"later": "暂不",
+			"download": "下载"
+		},
+		"downloading": {
+			"title": "正在下载 {{version}}",
+			"pending": "正在下载…",
+			"progress": "{{received}} / {{total}}",
+			"keepsGoing": "关闭此窗口不会中断下载。",
+			"cancel": "取消",
+			"close": "关闭"
+		},
+		"ready": {
+			"title": "可以安装了",
+			"body": "已下载 {{version}}。",
+			"onQuit": "退出时安装",
+			"restartNow": "立即重启",
+			"deferred": "下次退出 asdf 时安装。"
+		},
+		"error": {
+			"title": "更新失败",
+			"titleBlocked": "更新已中止",
+			"offline": "无法连接更新服务器。请检查网络后重试。",
+			"download": "无法下载 {{version}}。请检查网络后重试。",
+			"install": "无法安装 {{version}}。当前版本未改变。",
+			"signature": "无法校验此更新。下载内容与签名不符，asdf 已中止。当前版本未改变。",
+			"retry": "重试",
+			"close": "关闭",
+			"openRelease": "打开发布页"
+		}
+	}
 }

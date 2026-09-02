@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "Abrir",
 		"pathLabel": "Caminho do espaço de trabalho",
 		"idle": "Escolha uma pasta para abrir.",
 		"opening": "Abrindo…"
 	},
-	"notes": { "title": "Notas" }
+	"notes": {
+		"title": "Notas"
+	},
+	"update": {
+		"chip": {
+			"available": "Atualizar para {{version}}",
+			"downloading": "Atualizando… {{percent}}%",
+			"downloadingUnknown": "Atualizando…",
+			"ready": "Reinicie para atualizar",
+			"error": "Falha na atualização",
+			"ariaAvailable": "Atualização {{version}} disponível. Abrir detalhes.",
+			"ariaDownloading": "Baixando atualização, {{percent}} por cento.",
+			"ariaReady": "Atualização {{version}} pronta. Abrir detalhes.",
+			"ariaError": "Falha na atualização. Abrir detalhes."
+		},
+		"available": {
+			"title": "Atualização disponível",
+			"current": "Você está na {{version}}",
+			"notesLabel": "Novidades da {{version}}",
+			"notesEmpty": "Esta versão não tem notas.",
+			"safe": "Baixar não interrompe nada.",
+			"later": "Agora não",
+			"download": "Baixar"
+		},
+		"downloading": {
+			"title": "Baixando {{version}}",
+			"pending": "Baixando…",
+			"progress": "{{received}} de {{total}}",
+			"keepsGoing": "Fechar isto não interrompe o download.",
+			"cancel": "Cancelar",
+			"close": "Fechar"
+		},
+		"ready": {
+			"title": "Pronta para instalar",
+			"body": "A {{version}} foi baixada.",
+			"onQuit": "Instalar ao sair",
+			"restartNow": "Reiniciar agora",
+			"deferred": "Será instalada na próxima vez que você sair do asdf."
+		},
+		"error": {
+			"title": "Falha na atualização",
+			"titleBlocked": "Atualização bloqueada",
+			"offline": "Não conseguimos falar com o servidor de atualização. Verifique sua conexão e tente de novo.",
+			"download": "Não conseguimos baixar a {{version}}. Verifique sua conexão e tente de novo.",
+			"install": "Não conseguimos instalar a {{version}}. Sua versão atual não mudou.",
+			"signature": "Não conseguimos verificar esta atualização. O download não bateu com a assinatura, então o asdf parou. Sua versão atual não mudou.",
+			"retry": "Tentar de novo",
+			"close": "Fechar",
+			"openRelease": "Abrir a página da versão"
+		}
+	}
 }

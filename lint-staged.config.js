@@ -4,5 +4,9 @@ export default {
 	],
 	"*.rs": ["rustfmt --edition 2021"],
 	// Project-wide gates: ignore the file list, run once when any source is staged.
-	"*.{ts,tsx}": () => ["pnpm typecheck", "pnpm knip"],
+	"*.{ts,tsx,json}": () => [
+		"pnpm typecheck",
+		"pnpm knip",
+		"pnpm check:locales",
+	],
 };
