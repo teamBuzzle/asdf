@@ -6,12 +6,25 @@ import { useTerminalSession } from "../use-terminal-session";
 export function TerminalPane() {
 	const { t } = useTranslation();
 	const host = useRef<HTMLDivElement | null>(null);
-	const session = useTerminalSession(host);
+	const { session, preedit } = useTerminalSession(host);
 
 	return (
 		<div className="relative min-h-0 overflow-hidden">
 			{/* The emulator owns this element's children; never render into it. */}
 			<div ref={host} className="absolute inset-0" />
+
+			{preedit && (
+				<span
+					className="pointer-events-none absolute whitespace-pre bg-black font-mono text-sm text-white underline decoration-white/70 underline-offset-2"
+					style={{
+						left: `${preedit.left}px`,
+						top: `${preedit.top}px`,
+						lineHeight: `${preedit.height}px`,
+					}}
+				>
+					{preedit.text}
+				</span>
+			)}
 
 			{match(session)
 				.with({ status: "starting" }, () => (

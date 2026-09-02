@@ -215,6 +215,42 @@ mod tests {
         assert_eq!(exited, id);
     }
 
+    /// Guards the reader thread's UTF-8 carry logic: Hangul is 3 bytes per
+    /// syllable, so a chunk boundary lands mid-character sooner or later.
+    #[test]
+    fn round_trips_hangul() {
+        let registry = Arc::new(Registry::default());
+        let (tx, rx) = mpsc::channel();
+        let id = registry
+            .open(
+                None,
+                80,
+                24,
+                move |out| {
+                    let _ = tx.send(out.chunk);
+                },
+                |_| {},
+            )
+            .expect("pty opens");
+
+        registry
+            .write(id, "echo 안녕하세요-테스트\r")
+            .expect("write");
+
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        let mut seen = String::new();
+        while std::time::Instant::now() < deadline {
+            if let Ok(chunk) = rx.recv_timeout(Duration::from_millis(500)) {
+                seen.push_str(&chunk);
+                if seen.contains("안녕하세요-테스트") {
+                    break;
+                }
+            }
+        }
+        registry.close(id).expect("close");
+        assert!(seen.contains("안녕하세요-테스트"), "got: {seen:?}");
+    }
+
     #[test]
     fn rejects_unknown_session() {
         let registry = Registry::default();

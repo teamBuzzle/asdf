@@ -22,7 +22,8 @@
 		"rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
 		"prepare": "husky",
 		"rust:test": "cargo test --manifest-path src-tauri/Cargo.toml",
-		"check:locales": "node scripts/check-locales.mjs"
+		"check:locales": "node scripts/check-locales.mjs",
+		"check:ime": "bash scripts/ime-check.sh"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.7.0",
@@ -32,9 +33,10 @@
 		"@tauri-apps/plugin-opener": "^2.5.5",
 		"@tauri-apps/plugin-process": "^2.3.1",
 		"@tauri-apps/plugin-updater": "^2.11.0",
+		"@xterm/addon-fit": "0.10.0",
+		"@xterm/xterm": "5.5.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
-		"ghostty-web": "^0.4.0",
 		"i18next": "^26.4.1",
 		"lucide-react": "^1.39.0",
 		"react": "^19.1.0",

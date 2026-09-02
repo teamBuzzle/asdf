@@ -45,8 +45,10 @@ surface must be checked in both.
 - Family: **Geist Variable**, one family for everything. `--font-heading` is
   aliased to `--font-sans` deliberately: a second display face would add
   personality to a tool whose job is to disappear.
-- Monospace is not tokenised yet. Paths and command output currently use the
-  sans stack. When a terminal lands, add `--font-mono` here first.
+- `--font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+  monospace` — the system monospace stack, ending in Consolas so Windows lands
+  somewhere sane. The terminal reads it; nothing ships a font file for it,
+  because a terminal font is a preference and will become a setting.
 - Scale in use: `text-2xl` (page title) · `text-sm` (body and controls) ·
   `text-xs` (recent lists, metadata). Contrast lives between title and body;
   everything below the title is one of two sizes.

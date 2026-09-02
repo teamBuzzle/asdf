@@ -25,3 +25,9 @@ export const TERMINAL_OUTPUT_EVENT = "terminal://output";
 
 /** Emitted once with the session id when its shell has ended. */
 export const TERMINAL_EXIT_EVENT = "terminal://exit";
+
+/** Text an IME has committed natively, bypassing WebKit's broken composition. */
+export const IME_COMMIT_EVENT = "ime://commit";
+
+/** Text an IME is still composing. Replaces the previous preedit; "" clears it. */
+export const IME_PREEDIT_EVENT = "ime://preedit";

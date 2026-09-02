@@ -50,6 +50,37 @@ src-tauri/src/
 Commands hold no logic. That is what makes `cargo test` possible without
 spinning up a Tauri runtime — see `workspace/mod.rs` tests.
 
+## Native IME (macOS)
+
+`src-tauri/src/ime/` exists because WebKit does not deliver usable composition
+events, so the same xterm.js code that composes Korean correctly under Chromium
+loses characters under WKWebView. Tauri pins WKWebView on macOS, so the fix
+cannot live in the webview. Verified by loading one page in Safari and Chrome:
+identical xterm.js, `안녕하세요` in Chrome, `ㅇㄴㅎ세요` in Safari.
+
+A local key monitor runs ahead of the responder chain. When the active input
+source is not a CJK one the event is handed straight back, so xterm keeps its own
+handling of arrows, control sequences and everything else — do not widen that.
+Only CJK input goes through AppKit's text machinery, and `doCommandBySelector:`
+translates the keys the IME declines, since those no longer reach the webview.
+
+Windows uses WebView2 (Chromium) and composes correctly, so `install()` is a
+no-op there and the objc2 dependencies are macOS-only.
+
+**Known defect:** the first keystroke of a session is committed rather than
+composed, because the input method server handshake completes on the first
+`handleEvent` and consumes it. Warming up on mouse and modifier events does not
+help — those never reach the monitor. A synthetic key event does complete the
+handshake but leaves modifier state wrong, doubling and upper-casing subsequent
+input, so it was reverted. Closing this properly likely means making the client
+view first responder and taking over key handling from xterm, which is a large
+change for one character.
+
+`ASDF_IME_TRACE=1` logs every callback; `scripts/ime-check.sh` drives real
+keystrokes through the IME and asserts what the pty received. Reach for the trace
+before theorising — four fixes were attempted from guesswork before it existed,
+and two of them made things worse.
+
 ## The IPC contract
 
 `src/ipc/bindings.ts` mirrors the Rust types by hand. It is deliberately not
