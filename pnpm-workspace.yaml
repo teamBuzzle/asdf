@@ -1,0 +1,4 @@
+# pnpm reads build-script approvals here; the "pnpm" field in package.json is ignored.
+onlyBuiltDependencies:
+  - esbuild
+  - "@biomejs/biome"

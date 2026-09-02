@@ -28,3 +28,6 @@ dist-ssr
 
 # Personal, machine-local instructions
 CLAUDE.local.md
+
+# Registry credentials
+.npmrc

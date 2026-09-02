@@ -148,6 +148,27 @@ workflow changes — a stale contributing guide is worse than none.
 `.github/workflows/ci.yml` runs the full gate set on every pull request and is a
 required status check. Never weaken it to make a change pass.
 
+## Releases and versioning
+
+Versions are never edited by hand. release-please derives them from Conventional
+Commit types on `main`, keeps a `chore(main): release x.y.z` pull request open,
+and bumps `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`
+in one commit alongside `CHANGELOG.md`.
+
+`fix:` is a patch, `feat:` a minor, `feat!:` or a `BREAKING CHANGE:` footer a
+major once past 1.0. `chore:`, `docs:`, `ci:`, `style:` and `test:` release
+nothing — so choosing the wrong prefix silently changes what users receive.
+
+Merging the release pull request tags the release and triggers
+`.github/workflows/release.yml`, which builds installers for macOS, Windows and
+Linux and attaches them plus a signed `latest.json` to the GitHub release. The
+app checks that file on startup and offers the update in-app.
+
+The updater private key lives only in the `TAURI_SIGNING_PRIVATE_KEY` repository
+secret. It is not in the repository and must not be. Losing it means installed
+apps can never be updated again — a new key would fail signature verification on
+every existing install.
+
 ## Gates
 
 pre-commit runs `lint-staged`: biome → rustfmt → `pnpm typecheck` → `pnpm knip`,

@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "Abrir",
 		"pathLabel": "Ruta del espacio de trabajo",
 		"idle": "Elige una carpeta para abrir.",
 		"opening": "Abriendo…"
 	},
-	"notes": { "title": "Notas" }
+	"notes": {
+		"title": "Notas"
+	},
+	"update": {
+		"chip": {
+			"available": "Actualizar a {{version}}",
+			"downloading": "Actualizando… {{percent}} %",
+			"downloadingUnknown": "Actualizando…",
+			"ready": "Reinicia para actualizar",
+			"error": "Fallo la actualización",
+			"ariaAvailable": "Actualización {{version}} disponible. Abrir detalles.",
+			"ariaDownloading": "Descargando actualización, {{percent}} por ciento.",
+			"ariaReady": "Actualización {{version}} lista. Abrir detalles.",
+			"ariaError": "Falló la actualización. Abrir detalles."
+		},
+		"available": {
+			"title": "Actualización disponible",
+			"current": "Tienes la {{version}}",
+			"notesLabel": "Novedades de {{version}}",
+			"notesEmpty": "Esta versión no trae notas.",
+			"safe": "Descargar no interrumpe nada.",
+			"later": "Ahora no",
+			"download": "Descargar"
+		},
+		"downloading": {
+			"title": "Descargando {{version}}",
+			"pending": "Descargando…",
+			"progress": "{{received}} de {{total}}",
+			"keepsGoing": "Si cierras esto, la descarga sigue.",
+			"cancel": "Cancelar",
+			"close": "Cerrar"
+		},
+		"ready": {
+			"title": "Lista para instalar",
+			"body": "Se descargó la {{version}}.",
+			"onQuit": "Instalar al salir",
+			"restartNow": "Reiniciar ahora",
+			"deferred": "Se instalará la próxima vez que cierres asdf."
+		},
+		"error": {
+			"title": "Falló la actualización",
+			"titleBlocked": "Actualización bloqueada",
+			"offline": "No pudimos conectar con el servidor de actualizaciones. Revisa tu conexión e inténtalo de nuevo.",
+			"download": "No pudimos descargar la {{version}}. Revisa tu conexión e inténtalo de nuevo.",
+			"install": "No pudimos instalar la {{version}}. Tu versión actual no cambió.",
+			"signature": "No pudimos verificar esta actualización. La descarga no coincide con su firma, así que asdf se detuvo. Tu versión actual no cambió.",
+			"retry": "Reintentar",
+			"close": "Cerrar",
+			"openRelease": "Abrir la página de la versión"
+		}
+	}
 }

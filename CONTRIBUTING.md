@@ -68,6 +68,30 @@ fix(ipc): normalize thrown errors into IpcResult
 - `main` requires one approving review and a green CI run. Force pushes and
   branch deletion are blocked.
 
+## Releases
+
+Versioning is automatic and driven by your commit messages, so the type prefix
+is not decoration:
+
+| Commit | Version effect |
+|---|---|
+| `fix:` | patch — `0.1.0` → `0.1.1` |
+| `feat:` | minor — `0.1.0` → `0.2.0` |
+| `feat!:` or a `BREAKING CHANGE:` footer | minor while below 1.0, major after |
+| `chore:`, `docs:`, `ci:`, `style:`, `test:` | none |
+
+[release-please](https://github.com/googleapis/release-please) keeps a
+`chore(main): release x.y.z` pull request open and rewrites it as commits land
+on `main`. It bumps `package.json`, `src-tauri/Cargo.toml` and
+`src-tauri/tauri.conf.json` together, and writes `CHANGELOG.md`.
+
+Nothing ships until a human merges that pull request. Merging it tags the
+release and publishes a GitHub release; a matrix build then attaches installers
+for macOS (Apple Silicon and Intel), Windows and Linux, along with the signed
+`latest.json` the in-app updater reads.
+
+You never edit a version number by hand.
+
 ## Reporting bugs
 
 Use the issue forms. A version or commit hash and an operating system make the

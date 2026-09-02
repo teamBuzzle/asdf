@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "開く",
 		"pathLabel": "ワークスペースのパス",
 		"idle": "開くフォルダーを選択してください。",
 		"opening": "開いています…"
 	},
-	"notes": { "title": "メモ" }
+	"notes": {
+		"title": "メモ"
+	},
+	"update": {
+		"chip": {
+			"available": "アップデート {{version}}",
+			"downloading": "更新中… {{percent}}%",
+			"downloadingUnknown": "更新中…",
+			"ready": "再起動で適用",
+			"error": "アップデート失敗",
+			"ariaAvailable": "アップデート {{version}} があります。詳細を開く。",
+			"ariaDownloading": "アップデートをダウンロード中、{{percent}}パーセント。",
+			"ariaReady": "アップデート {{version}} の準備完了。詳細を開く。",
+			"ariaError": "アップデート失敗。詳細を開く。"
+		},
+		"available": {
+			"title": "アップデートがあります",
+			"current": "現在は {{version}} です",
+			"notesLabel": "{{version}} の変更点",
+			"notesEmpty": "このバージョンの変更点はありません。",
+			"safe": "ダウンロードしても作業は中断されません。",
+			"later": "後で",
+			"download": "ダウンロード"
+		},
+		"downloading": {
+			"title": "{{version}} をダウンロード中",
+			"pending": "ダウンロード中…",
+			"progress": "{{total}} 中 {{received}}",
+			"keepsGoing": "閉じてもダウンロードは続きます。",
+			"cancel": "キャンセル",
+			"close": "閉じる"
+		},
+		"ready": {
+			"title": "インストールの準備ができました",
+			"body": "{{version}} をダウンロードしました。",
+			"onQuit": "終了時にインストール",
+			"restartNow": "今すぐ再起動",
+			"deferred": "次に asdf を終了するときにインストールされます。"
+		},
+		"error": {
+			"title": "アップデート失敗",
+			"titleBlocked": "アップデートを中止しました",
+			"offline": "更新サーバーに接続できませんでした。接続を確認して再試行してください。",
+			"download": "{{version}} をダウンロードできませんでした。接続を確認して再試行してください。",
+			"install": "{{version}} をインストールできませんでした。現在のバージョンは変わりません。",
+			"signature": "このアップデートを検証できませんでした。ダウンロードが署名と一致しなかったため中止しました。現在のバージョンは変わりません。",
+			"retry": "再試行",
+			"close": "閉じる",
+			"openRelease": "リリースページを開く"
+		}
+	}
 }

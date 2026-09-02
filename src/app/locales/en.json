@@ -1,10 +1,62 @@
 {
-	"app": { "title": "asdf" },
+	"app": {
+		"title": "asdf"
+	},
 	"workspace": {
 		"open": "Open",
 		"pathLabel": "Workspace path",
 		"idle": "Pick a folder to open.",
 		"opening": "Opening…"
 	},
-	"notes": { "title": "Notes" }
+	"notes": {
+		"title": "Notes"
+	},
+	"update": {
+		"chip": {
+			"available": "Update {{version}}",
+			"downloading": "Updating… {{percent}}%",
+			"downloadingUnknown": "Updating…",
+			"ready": "Restart to update",
+			"error": "Update failed",
+			"ariaAvailable": "Update {{version}} available. Open update details.",
+			"ariaDownloading": "Downloading update, {{percent}} percent complete.",
+			"ariaReady": "Update {{version}} ready. Open update details.",
+			"ariaError": "Update failed. Open update details."
+		},
+		"available": {
+			"title": "Update available",
+			"current": "You're on {{version}}",
+			"notesLabel": "Release notes for {{version}}",
+			"notesEmpty": "No release notes for this version.",
+			"safe": "Downloading won't interrupt anything.",
+			"later": "Not now",
+			"download": "Download"
+		},
+		"downloading": {
+			"title": "Downloading {{version}}",
+			"pending": "Downloading…",
+			"progress": "{{received}} of {{total}}",
+			"keepsGoing": "Closing this keeps the download running.",
+			"cancel": "Cancel",
+			"close": "Close"
+		},
+		"ready": {
+			"title": "Ready to install",
+			"body": "{{version}} is downloaded.",
+			"onQuit": "Install on quit",
+			"restartNow": "Restart now",
+			"deferred": "It will install the next time you quit asdf."
+		},
+		"error": {
+			"title": "Update failed",
+			"titleBlocked": "Update blocked",
+			"offline": "We couldn't reach the update server. Check your connection and try again.",
+			"download": "We couldn't download {{version}}. Check your connection and try again.",
+			"install": "We couldn't install {{version}}. Your current version is unchanged.",
+			"signature": "We couldn't verify this update. The download didn't match its signature, so asdf stopped. Your current version is unchanged.",
+			"retry": "Try again",
+			"close": "Close",
+			"openRelease": "Open release page"
+		}
+	}
 }
