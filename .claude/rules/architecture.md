@@ -82,10 +82,19 @@ particular call. Four attempts are recorded here so nobody repeats them:
 | Synthetic key event at install | Completes the handshake but leaves modifier state wrong — every character doubled and upper-cased |
 | Feed the first key through twice, first pass muted | Both passes still commit; the handshake is time-based, not call-based |
 | Query the input source differently (`currentInputContext`, then Carbon TIS) | The source was always reported correctly; this was never the problem |
+| Have the user click the terminal before typing | No effect |
+| Take first responder while a CJK source is active, so AppKit binds the context | Binding is not synchronous enough to help the keystroke that triggers it, and holding first responder stops the webview receiving anything — English input broke entirely. Reverted. |
 
-Closing it properly means making the client view first responder and taking over
-key handling from xterm — arrows, control sequences, tab completion, all of it.
-That is a large, risky change for one character at session start.
+Apple's documentation explains why: an input context binds to its client, and
+the input method session is established, when that client **becomes first
+responder in the key window**. Ghostty, Alacritty and WezTerm avoid this because
+their view is the first responder. Ours is not, so `activate()` is only a partial
+substitute and the session is created lazily on the first `handleEvent`.
+
+Taking first responder was tried and reverted (see the table). Doing it properly
+means holding it permanently and reimplementing everything xterm does with a
+keystroke — control chords, tab completion, history search — which is a large,
+risky change for one character at session start.
 
 `ASDF_IME_TRACE=1` logs every callback; `scripts/ime-check.sh` drives real
 keystrokes through the IME and asserts what the pty received. Reach for the trace
