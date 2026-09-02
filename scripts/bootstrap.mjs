@@ -7,11 +7,15 @@ import { platform } from "node:process";
 const isWindows = platform === "win32";
 
 const has = (cmd) =>
-	spawnSync(cmd, ["--version"], { stdio: "ignore", shell: isWindows }).status === 0;
+	spawnSync(cmd, ["--version"], { stdio: "ignore", shell: isWindows })
+		.status === 0;
 
 const run = (cmd, args, hint) => {
 	console.log(`\n$ ${cmd} ${args.join(" ")}`);
-	const { status } = spawnSync(cmd, args, { stdio: "inherit", shell: isWindows });
+	const { status } = spawnSync(cmd, args, {
+		stdio: "inherit",
+		shell: isWindows,
+	});
 	if (status !== 0) {
 		console.error(`\nFailed: ${cmd} ${args.join(" ")}`);
 		if (hint) console.error(hint);
@@ -54,7 +58,9 @@ const hasMsvc = () => {
 };
 
 if (isWindows && !hasMsvc()) {
-	console.log("MSVC build tools missing — installing (several GB, takes a while).");
+	console.log(
+		"MSVC build tools missing — installing (several GB, takes a while).",
+	);
 	winget(
 		"Microsoft.VisualStudio.2022.BuildTools",
 		"--quiet --wait --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended",
