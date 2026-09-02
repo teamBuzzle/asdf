@@ -2,8 +2,11 @@
 // to the user, an extra key is dead weight nobody will ever delete.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const dir = new URL("../src/app/locales/", import.meta.url).pathname;
+// fileURLToPath, not .pathname: on Windows .pathname yields "/C:/…" and join()
+// turns that into "C:\C:\…".
+const dir = fileURLToPath(new URL("../src/app/locales/", import.meta.url));
 const flatten = (value, prefix = "") =>
 	Object.entries(value).flatMap(([key, child]) =>
 		typeof child === "object" && child !== null

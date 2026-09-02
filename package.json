@@ -22,7 +22,8 @@
 		"rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings",
 		"prepare": "husky",
 		"rust:test": "cargo test --manifest-path src-tauri/Cargo.toml",
-		"check:locales": "node scripts/check-locales.mjs"
+		"check:locales": "node scripts/check-locales.mjs",
+		"bootstrap": "node scripts/bootstrap.mjs"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.7.0",
@@ -64,12 +65,6 @@
 		"shadcn": "^4.19.1",
 		"typescript": "~5.8.3",
 		"vite": "^7.0.4"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"esbuild",
-			"@biomejs/biome"
-		]
 	},
 	"packageManager": "pnpm@10.14.0",
 	"engines": {
