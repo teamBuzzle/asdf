@@ -16,7 +16,7 @@ readers.
 |---|---|
 | Commit messages | English |
 | Code comments and doc comments | English |
-| Pull request titles and bodies | English |
+| Pull request titles and bodies | English — except the Summary section, which carries a Korean version in a `<details>` block |
 | Issue titles and bodies | English |
 | README, CLAUDE.md, rules, ADRs | English |
 | Branch names | English |
@@ -110,11 +110,21 @@ This repository does not use Linear. Work is tracked in GitHub Issues.
 
 - If a change touches files, find the issue first; if none exists, create one
   and start. Do not ask — create it.
-- Issues carry a `type:*` label and follow `.github/ISSUE_TEMPLATE.md`.
+- Issues use the forms in `.github/ISSUE_TEMPLATE/`, which apply the `type:*` label automatically.
 - **Link the issue from the pull request body with `Ref #12`.**
 - Use `Closes #12` only when the pull request satisfies every acceptance item on
   that issue. A closing keyword on partial work closes the issue without anyone
   checking the acceptance criteria.
+
+## Open source hygiene
+
+The repository is public, so it carries the files people look for:
+`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1),
+`SECURITY.md`, issue forms and `.github/CODEOWNERS`. Keep them accurate when the
+workflow changes — a stale contributing guide is worse than none.
+
+`.github/workflows/ci.yml` runs the full gate set on every pull request and is a
+required status check. Never weaken it to make a change pass.
 
 ## Gates
 

@@ -83,9 +83,16 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 ```markdown
 ## Summary
 
-<!-- Describe what this PR changes, in English -->
+<!-- English. Describe what this PR changes and why. -->
+<!-- Link the issue with `Ref #12`. Use `Closes #12` only when this PR
+     satisfies every acceptance item on that issue. -->
 
-<!-- 연결된 이슈가 있으면 `Ref #12`. Acceptance를 전부 만족할 때만 `Closes #12`. -->
+<details>
+<summary>🇰🇷 한국어</summary>
+
+<!-- The same explanation in Korean. -->
+
+</details>
 
 ## Impact
 
@@ -105,7 +112,22 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 - <!-- Key areas reviewers should focus on -->
 ```
 
-Fill in all sections based on your analysis. Write everything in English.
+Fill in all sections based on your analysis.
+
+**The Summary section is bilingual. Everything else is English only.**
+
+GitHub markdown has no tabs, so the Korean version goes in a `<details>` block
+directly under the English one — collapsed by default, one click to open.
+
+- Write the English summary first, then the Korean one.
+- The Korean block is not a translation of the English sentences; it is the same
+  explanation written natively in Korean. Same facts, same structure, same level
+  of detail. Do not let one side carry information the other lacks.
+- Keep the `<summary>🇰🇷 한국어</summary>` line exactly as it is, so every pull
+  request looks the same.
+- Leave a blank line after `<details>` and before `</details>`, or GitHub will
+  not render the markdown inside the block.
+- Title, Impact, Checks and Review Focus stay English only.
 
 ### 5. Push and create PR
 
@@ -172,7 +194,9 @@ After creating the PR, output:
 - ALWAYS assign self as assignee
 - ALWAYS assign exactly one reviewer, chosen at random from the review pool minus the author
 - ALWAYS use the PR template from `.github/pull_request_template.md`
-- ALWAYS write the PR title and body in English
+- ALWAYS write the PR title in English
+- ALWAYS write the Summary section twice: English, then Korean inside the
+  `<details>` block. Every other section is English only
 - Link the GitHub issue with `Ref #<n>` in the body. Use `Closes #<n>` only when the PR satisfies every acceptance item on that issue
 - If the branch has no commits ahead of base, warn the user and do not create the PR
 - If there are uncommitted changes, warn the user before proceeding
