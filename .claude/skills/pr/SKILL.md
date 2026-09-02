@@ -83,13 +83,13 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 ```markdown
 ## Summary
 
-<!-- Describe what this PR changes, in Korean -->
+<!-- Describe what this PR changes, in English -->
 
 <!-- 연결된 이슈가 있으면 `Ref #12`. Acceptance를 전부 만족할 때만 `Closes #12`. -->
 
 ## Impact
 
-- Scope: <!-- affected area: e.g., 교사 관리, 일일 보고서 -->
+- Scope: <!-- affected area, e.g. ipc layer, workspace feature, Tauri shell -->
 - Risk: <!-- low / medium / high -->
 - Rollback: <!-- how to revert if needed -->
 
@@ -105,7 +105,7 @@ Use the repository's PR template at `.github/pull_request_template.md`:
 - <!-- Key areas reviewers should focus on -->
 ```
 
-Fill in all sections based on your analysis. Write in Korean for user-facing text.
+Fill in all sections based on your analysis. Write everything in English.
 
 ### 5. Push and create PR
 
@@ -120,7 +120,7 @@ git push -u origin $(git rev-parse --abbrev-ref HEAD)
 # - reviewer = collaborators excluding self (if available)
 gh pr create \
   --base <base-branch> \
-  --title "<concise title in Korean, under 70 chars>" \
+  --title "<concise title in English, under 70 chars>" \
   --body "$(cat <<'EOF'
 <filled template content>
 EOF
@@ -154,7 +154,7 @@ After creating the PR, output:
 - ALWAYS assign self as assignee
 - ALWAYS add other collaborators as reviewers (if any exist)
 - ALWAYS use the PR template from `.github/pull_request_template.md`
-- ALWAYS write PR title and summary content in Korean
+- ALWAYS write the PR title and body in English
 - Link the GitHub issue with `Ref #<n>` in the body. Use `Closes #<n>` only when the PR satisfies every acceptance item on that issue
 - If the branch has no commits ahead of base, warn the user and do not create the PR
 - If there are uncommitted changes, warn the user before proceeding

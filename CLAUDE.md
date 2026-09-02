@@ -6,6 +6,28 @@ repositories in parallel, each in its own git worktree.
 
 @.claude/rules/architecture.md
 
+## Language
+
+**Everything written into this repository is in English.** This is a public
+repository with a global audience, so a Korean artifact is a wall for most
+readers.
+
+| Artifact | Language |
+|---|---|
+| Commit messages | English |
+| Code comments and doc comments | English |
+| Pull request titles and bodies | English |
+| Issue titles and bodies | English |
+| README, CLAUDE.md, rules, ADRs | English |
+| Branch names | English |
+| UI strings | Neither — they go in `src/app/i18n.ts` as translation resources |
+
+Chat with the user stays in whatever language the user writes. Only artifacts
+that land in the repository or on GitHub are English.
+
+Never hardcode user-facing text in a component. Add a key to `src/app/i18n.ts`
+and read it with `t()`. That file is the one place non-English strings belong.
+
 ## Commands
 
 ```sh
@@ -14,59 +36,65 @@ pnpm lint / lint:fix          # biome, includes the layer boundary rules
 pnpm typecheck                # tsc --noEmit
 pnpm knip                     # unused files, exports, dependencies
 pnpm rust:lint                # cargo clippy -D warnings
-cargo test --manifest-path src-tauri/Cargo.toml
+pnpm rust:test                # cargo test
 ```
 
-## ⚠️ Git/PR 작업은 반드시 스킬 경유 (의무)
+## Git and pull requests must go through the skills
 
-브랜치 생성·커밋·푸시·PR 생성·리뷰 반영을 직접 `git`/`gh` CLI로 실행하지 않는다.
-스킬이 commitlint·브랜치 네이밍·PR 템플릿·리뷰어 자동 지정·라벨 자동 부착·main
-보호 가드를 일괄 적용하므로, 직접 호출하면 안전 가드가 무너진다.
+Do not run `git` or `gh` directly for branch creation, commit, push, pull
+request creation, or review handling. The skills apply commitlint, branch
+naming, the PR template, reviewer assignment, label assignment and the main
+branch guard in one step; calling the CLI directly bypasses all of it.
 
-| 단계 | 사용해야 할 스킬 |
+| Task | Skill |
 |---|---|
-| 새 브랜치 생성 | `/new` |
-| 커밋 + 푸시 | `/commit-push` |
-| PR 생성 | `/pr` |
-| 리뷰 반영 | `/pr-review-apply` |
-| PR 라인별 리뷰 | `/pr-review` |
+| New branch | `/new` |
+| Commit and push | `/commit-push` |
+| Create a pull request | `/pr` |
+| Apply review feedback | `/pr-review-apply` |
+| Line-by-line PR review | `/pr-review` |
 
-**main 브랜치에 직접 커밋·푸시하지 않는다.** main에서 커밋 요청이 오면 `/new`로
-브랜치를 먼저 만든다. 병합된 PR이 붙은 브랜치에도 추가 푸시하지 않는다.
+**Never commit or push to `main`.** It is protected on GitHub: pull requests are
+required, force pushes and deletions are blocked, and the rule applies to
+administrators. If a commit is requested while on `main`, create a branch with
+`/new` first. Do not push to a branch whose pull request is already merged.
 
-**예외:** 사용자가 "직접 git 써", "스킬 거치지 말고"라고 명시한 경우만.
+**Exception:** only when the user explicitly says to bypass the skills.
 
-정의 위치: `.claude/skills/{new,commit-push,pr,pr-review,pr-review-apply}/SKILL.md`
+Definitions live in `.claude/skills/{new,commit-push,pr,pr-review,pr-review-apply}/SKILL.md`.
 
-## 라벨
+## Labels
 
-PR에는 `type:*` 하나와 `mode:*` 하나를 반드시 단다.
+Every pull request carries exactly one `type:*` and one `mode:*` label.
 
 - `type:` — feat, fix, refactor, chore, docs, test, style, ci, perf
-- `mode:` — `mode:ai`(AI 주도), `mode:human`(사람 주도), `mode:mixed`(공동)
+- `mode:` — `mode:ai` (AI drove the work), `mode:human` (a human drove it),
+  `mode:mixed` (both contributed substantially)
 
-PR 본문은 `.github/pull_request_template.md`를 채운다. 제목과 본문은 한국어.
+Pull request bodies fill in `.github/pull_request_template.md`.
 
-## 이슈 (GitHub Issues)
+## Issues
 
-이 저장소는 Linear를 쓰지 않는다. 작업 추적은 GitHub Issues로 한다.
+This repository does not use Linear. Work is tracked in GitHub Issues.
 
-- 파일을 고치는 일이면 먼저 이슈를 찾고, 없으면 만든 뒤 시작한다. 묻지 말고 만든다.
-- 이슈에도 `type:*` 라벨을 단다. 본문은 `.github/ISSUE_TEMPLATE.md` 형식.
-- **PR 본문에 `Ref #12`를 적어 이슈를 연결한다.**
-- `Closes #12`는 그 PR이 이슈의 Acceptance를 전부 만족할 때만 쓴다. 부분 작업에
-  닫는 낱말을 쓰면 완료 조건 검증 없이 이슈가 닫힌다.
+- If a change touches files, find the issue first; if none exists, create one
+  and start. Do not ask — create it.
+- Issues carry a `type:*` label and follow `.github/ISSUE_TEMPLATE.md`.
+- **Link the issue from the pull request body with `Ref #12`.**
+- Use `Closes #12` only when the pull request satisfies every acceptance item on
+  that issue. A closing keyword on partial work closes the issue without anyone
+  checking the acceptance criteria.
 
 ## Gates
 
 pre-commit runs `lint-staged`: biome → rustfmt → `pnpm typecheck` → `pnpm knip`,
-serially, on the staged snapshot. commit-msg runs commitlint (Conventional
-Commits). pre-push runs clippy. All of these must stay green; do not add
-`--no-verify` to a workflow.
+serially, on the staged snapshot. commit-msg runs commitlint. pre-push runs
+clippy and `cargo test`. All of these must stay green; never add `--no-verify`
+to a workflow.
 
 ## Conventions
 
-- Package manager is pnpm. Never use npm or yarn here.
+- The package manager is pnpm. Never use npm or yarn here.
 - Add shadcn components with `npx shadcn@latest add <name>` — do not hand-write
   them into `src/components/ui`.
 - Base UI composes with a `render` prop, not Radix's `asChild`.
