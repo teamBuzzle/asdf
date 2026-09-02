@@ -94,6 +94,16 @@ Every pull request carries exactly one `type:*` and one `mode:*` label.
 
 Pull request bodies fill in `.github/pull_request_template.md`.
 
+## Review
+
+`main` requires **one approving review**. Force pushes and deletions are
+blocked, conversations must be resolved, and the rule applies to administrators.
+
+The review pool is `devxian96` and `Hayoung0708`. `/pr` assigns exactly one of
+them at random, minus the author — a person cannot approve their own pull
+request, so assigning the author would deadlock the merge. Other collaborators
+are not on the rota and are not auto-assigned.
+
 ## Issues
 
 This repository does not use Linear. Work is tracked in GitHub Issues.
