@@ -1,2 +1,6 @@
+# Hooks run under a non-login shell, which does not read the profile rustup
+# writes its PATH into. Without this, pushing from a GUI git client fails.
+[ -d "$HOME/.cargo/bin" ] && PATH="$HOME/.cargo/bin:$PATH"
+
 pnpm rust:lint
 pnpm rust:test
