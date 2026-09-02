@@ -25,3 +25,6 @@ dist-ssr
 
 # OMC state
 .omc/
+
+# Personal, machine-local instructions
+CLAUDE.local.md

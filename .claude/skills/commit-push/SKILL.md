@@ -78,8 +78,6 @@ Analyze the staged changes and generate a commitlint-compliant commit message.
 <type>(<optional scope>): <description>
 
 <optional body>
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 ```
 
 **Type prefixes:**
@@ -102,7 +100,7 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 - Imperative mood: "add", not "added" or "adds"
 - Scope is optional but recommended for clarity (e.g. `feat(workspace): add recent list`)
 - Body is optional — use for complex changes that need explanation
-- Always end with `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`
+- Do not add a `Co-Authored-By:` trailer unless a local rule asks for one; `CLAUDE.local.md` may forbid it outright
 
 **Examples:**
 
@@ -166,8 +164,6 @@ pnpm build
 ```bash
 git commit -m "$(cat <<'EOF'
 <confirmed commit message>
-
-Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
