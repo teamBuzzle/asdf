@@ -2,15 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "開く",
-		"pathLabel": "ワークスペースのパス",
-		"idle": "開くフォルダーを選択してください。",
-		"opening": "開いています…"
-	},
-	"notes": {
-		"title": "メモ"
-	},
 	"update": {
 		"chip": {
 			"available": "アップデート {{version}}",
@@ -58,5 +49,10 @@
 			"close": "閉じる",
 			"openRelease": "リリースページを開く"
 		}
+	},
+	"terminal": {
+		"starting": "シェルを起動中…",
+		"failed": "シェルを起動できませんでした。",
+		"exited": "シェルが終了しました。"
 	}
 }

@@ -11,4 +11,23 @@ export type WorkspaceInfo = {
 export type AppError =
 	| { kind: "notFound"; message: string }
 	| { kind: "notADirectory"; message: string }
-	| { kind: "io"; message: string };
+	| { kind: "io"; message: string }
+	| { kind: "terminal"; message: string }
+	| { kind: "noSuchTerminal"; message: string };
+
+export type TerminalOutput = {
+	id: number;
+	chunk: string;
+};
+
+/** Emitted by the Rust reader thread for every chunk a session prints. */
+export const TERMINAL_OUTPUT_EVENT = "terminal://output";
+
+/** Emitted once with the session id when its shell has ended. */
+export const TERMINAL_EXIT_EVENT = "terminal://exit";
+
+/** Text an IME has committed natively, bypassing WebKit's broken composition. */
+export const IME_COMMIT_EVENT = "ime://commit";
+
+/** Text an IME is still composing. Replaces the previous preedit; "" clears it. */
+export const IME_PREEDIT_EVENT = "ime://preedit";

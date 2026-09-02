@@ -2,15 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "Open",
-		"pathLabel": "Workspace path",
-		"idle": "Pick a folder to open.",
-		"opening": "Opening…"
-	},
-	"notes": {
-		"title": "Notes"
-	},
 	"update": {
 		"chip": {
 			"available": "Update {{version}}",
@@ -58,5 +49,10 @@
 			"close": "Close",
 			"openRelease": "Open release page"
 		}
+	},
+	"terminal": {
+		"starting": "Starting shell…",
+		"failed": "The shell could not be started.",
+		"exited": "The shell has exited."
 	}
 }
