@@ -285,6 +285,7 @@ pub fn install<R: Runtime>(window: &WebviewWindow<R>) -> Result<(), String> {
 
         // Re-activate in case the webview took the input context back on focus.
         context_for_handler.activate();
+
         let _ = context_for_handler.handleEvent(event_ref);
 
         // Always consume. handleEvent reports false for keys the IME declines,

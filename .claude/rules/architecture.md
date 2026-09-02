@@ -68,13 +68,24 @@ Windows uses WebView2 (Chromium) and composes correctly, so `install()` is a
 no-op there and the objc2 dependencies are macOS-only.
 
 **Known defect:** the first keystroke of a session is committed rather than
-composed, because the input method server handshake completes on the first
-`handleEvent` and consumes it. Warming up on mouse and modifier events does not
-help — those never reach the monitor. A synthetic key event does complete the
-handshake but leaves modifier state wrong, doubling and upper-casing subsequent
-input, so it was reverted. Closing this properly likely means making the client
-view first responder and taking over key handling from xterm, which is a large
-change for one character.
+composed, so `안녕하세요` arrives as `ㅇㅏ녕하세요`. Everything after the first
+syllable is correct.
+
+The trace shows the first key arriving with `chars="d"` while the input source
+already reports Korean: the keyboard layout has not been applied to the process
+yet, and the input method session is not up. It needs elapsed time, not a
+particular call. Four attempts are recorded here so nobody repeats them:
+
+| Attempt | Result |
+|---|---|
+| Warm up on mouse and modifier events | Those events never reach the monitor |
+| Synthetic key event at install | Completes the handshake but leaves modifier state wrong — every character doubled and upper-cased |
+| Feed the first key through twice, first pass muted | Both passes still commit; the handshake is time-based, not call-based |
+| Query the input source differently (`currentInputContext`, then Carbon TIS) | The source was always reported correctly; this was never the problem |
+
+Closing it properly means making the client view first responder and taking over
+key handling from xterm — arrows, control sequences, tab completion, all of it.
+That is a large, risky change for one character at session start.
 
 `ASDF_IME_TRACE=1` logs every callback; `scripts/ime-check.sh` drives real
 keystrokes through the IME and asserts what the pty received. Reach for the trace
