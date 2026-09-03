@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { Minus, Settings, Square, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import icon from "@/assets/asdf-icon.svg";
@@ -31,8 +31,6 @@ export function App() {
 		const apply = () => {
 			const dark = theme === "dark" || (theme === "system" && !!media?.matches);
 			document.documentElement.classList.toggle("dark", dark);
-			// The window controls sit outside the DOM, so they are told separately.
-			void platform.setTitleBarTheme(dark);
 		};
 		apply();
 		// "System" has to keep following the OS after mount, not just read it once.
@@ -44,11 +42,44 @@ export function App() {
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-			{/* Drawn by us, dragged by the OS. The window controls are overlaid on
-			    its right end, and the CSS keeps the strip clear of them. */}
-			<div className="title-bar flex shrink-0 select-none items-center gap-2 border-b px-3 text-muted-foreground text-xs">
+			{/* Drawn by us, dragged by the OS. On macOS the traffic lights sit at the
+			    left end and the app draws no controls; elsewhere it draws its own at
+			    the right end, so minimise and maximise can hover grey while close
+			    hovers red. */}
+			<div
+				className={`title-bar flex shrink-0 select-none items-center gap-2 border-b text-muted-foreground text-xs ${platform.isMac ? "pl-20" : "pl-4"}`}
+			>
 				<img src={icon} alt="" className="size-4" draggable={false} />
 				<span className="font-medium">asdf</span>
+
+				{!platform.isMac && (
+					<div className="ml-auto flex h-full">
+						<button
+							type="button"
+							aria-label={t("window.minimize")}
+							onClick={platform.window.minimize}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
+						>
+							<Minus className="size-3.5" />
+						</button>
+						<button
+							type="button"
+							aria-label={t("window.maximize")}
+							onClick={platform.window.maximize}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
+						>
+							<Square className="size-3" />
+						</button>
+						<button
+							type="button"
+							aria-label={t("window.close")}
+							onClick={platform.window.close}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-red-600 hover:text-white"
+						>
+							<X className="size-4" />
+						</button>
+					</div>
+				)}
 			</div>
 
 			<div className="flex min-h-0 flex-1">

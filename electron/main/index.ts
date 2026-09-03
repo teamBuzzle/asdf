@@ -15,16 +15,6 @@ const directory = path.dirname(fileURLToPath(import.meta.url));
 
 const terminals = new Registry();
 
-/**
- * Colours for the window controls the OS draws over the title bar. They match
- * `--background` and `--foreground` in src/index.css for each theme; the strip
- * under them is DOM and follows the theme by itself.
- */
-const TITLE_BAR = {
-	light: { color: "#ffffff", symbolColor: "#0a0a0a", height: 36 },
-	dark: { color: "#0a0a0a", symbolColor: "#fafafa", height: 36 },
-} as const;
-
 // The app draws its own chrome and has no use for a menu bar. macOS keeps its
 // default one, where the application menu is also what binds copy, paste and
 // quit to their shortcuts.
@@ -42,12 +32,11 @@ function createWindow(): BrowserWindow {
 		minWidth: 900,
 		minHeight: 600,
 		show: false,
-		// The renderer draws the title bar; the OS keeps drawing only the window
-		// controls on top of it, so snap layouts, double-click to maximise and the
-		// accessibility of those buttons all stay native. The renderer recolours
-		// the controls whenever its theme resolves — see `window://title-bar`.
+		// The renderer draws the title bar and its controls, so their hover states
+		// can differ — the OS overlay only lets close turn red. macOS keeps its
+		// traffic lights, placed to sit inside the strip the renderer draws.
 		titleBarStyle: "hidden",
-		titleBarOverlay: TITLE_BAR.light,
+		trafficLightPosition: { x: 12, y: 10 },
 		webPreferences: {
 			preload: path.join(directory, "../preload/index.mjs"),
 			sandbox: false,
@@ -143,12 +132,21 @@ ipcMain.handle("shell://open-external", (_event, { url }: { url: string }) => {
 	return ok(null);
 });
 
-ipcMain.handle("window://title-bar", (_event, { dark }: { dark: boolean }) => {
-	// macOS places its own traffic lights and recolours nothing here; the call
-	// only exists on the platforms that draw an overlay.
-	if (typeof main?.setTitleBarOverlay === "function") {
-		main.setTitleBarOverlay(dark ? TITLE_BAR.dark : TITLE_BAR.light);
-	}
+ipcMain.handle("window://minimize", () => {
+	main?.minimize();
+	return ok(null);
+});
+
+ipcMain.handle("window://maximize", () => {
+	if (main?.isMaximized()) main.unmaximize();
+	else main?.maximize();
+	return ok(null);
+});
+
+// Goes through the same close path as the OS button, so the renderer's on-quit
+// work still runs.
+ipcMain.handle("window://close", () => {
+	main?.close();
 	return ok(null);
 });
 

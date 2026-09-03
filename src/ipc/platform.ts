@@ -114,13 +114,18 @@ export const platform = {
 		unwrap(await call<null>("shell://open-external", { url }));
 	},
 
-	/**
-	 * Recolours the window controls the OS draws over the title bar, since they
-	 * are outside the DOM and cannot follow the theme on their own.
-	 */
-	setTitleBarTheme: async (dark: boolean): Promise<void> => {
-		unwrap(await call<null>("window://title-bar", { dark }));
+	/** The renderer draws its own window controls; these are what they do. */
+	window: {
+		minimize: () => void call<null>("window://minimize"),
+		maximize: () => void call<null>("window://maximize"),
+		close: () => void call<null>("window://close"),
 	},
+
+	/**
+	 * macOS draws its own traffic lights over the title bar, so the renderer
+	 * leaves room for them and draws no controls of its own there.
+	 */
+	isMac: navigator.userAgent.includes("Macintosh"),
 
 	onWindowClose: (handler: () => Promise<void> | void): Promise<UnlistenFn> => {
 		closeHandlers.add(handler);
