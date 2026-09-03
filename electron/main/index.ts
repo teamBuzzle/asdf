@@ -15,6 +15,16 @@ const directory = path.dirname(fileURLToPath(import.meta.url));
 
 const terminals = new Registry();
 
+/**
+ * Colours for the window controls the OS draws over the title bar. They match
+ * `--background` and `--foreground` in src/index.css for each theme; the strip
+ * under them is DOM and follows the theme by itself.
+ */
+const TITLE_BAR = {
+	light: { color: "#ffffff", symbolColor: "#0a0a0a", height: 36 },
+	dark: { color: "#0a0a0a", symbolColor: "#fafafa", height: 36 },
+} as const;
+
 // The app draws its own chrome and has no use for a menu bar. macOS keeps its
 // default one, where the application menu is also what binds copy, paste and
 // quit to their shortcuts.
@@ -32,6 +42,12 @@ function createWindow(): BrowserWindow {
 		minWidth: 900,
 		minHeight: 600,
 		show: false,
+		// The renderer draws the title bar; the OS keeps drawing only the window
+		// controls on top of it, so snap layouts, double-click to maximise and the
+		// accessibility of those buttons all stay native. The renderer recolours
+		// the controls whenever its theme resolves — see `window://title-bar`.
+		titleBarStyle: "hidden",
+		titleBarOverlay: TITLE_BAR.light,
 		webPreferences: {
 			preload: path.join(directory, "../preload/index.mjs"),
 			sandbox: false,
@@ -124,6 +140,15 @@ ipcMain.handle("app://relaunch", () => {
 
 ipcMain.handle("shell://open-external", (_event, { url }: { url: string }) => {
 	void shell.openExternal(url);
+	return ok(null);
+});
+
+ipcMain.handle("window://title-bar", (_event, { dark }: { dark: boolean }) => {
+	// macOS places its own traffic lights and recolours nothing here; the call
+	// only exists on the platforms that draw an overlay.
+	if (typeof main?.setTitleBarOverlay === "function") {
+		main.setTitleBarOverlay(dark ? TITLE_BAR.dark : TITLE_BAR.light);
+	}
 	return ok(null);
 });
 

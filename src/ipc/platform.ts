@@ -114,6 +114,14 @@ export const platform = {
 		unwrap(await call<null>("shell://open-external", { url }));
 	},
 
+	/**
+	 * Recolours the window controls the OS draws over the title bar, since they
+	 * are outside the DOM and cannot follow the theme on their own.
+	 */
+	setTitleBarTheme: async (dark: boolean): Promise<void> => {
+		unwrap(await call<null>("window://title-bar", { dark }));
+	},
+
 	onWindowClose: (handler: () => Promise<void> | void): Promise<UnlistenFn> => {
 		closeHandlers.add(handler);
 		return Promise.resolve(() => closeHandlers.delete(handler));

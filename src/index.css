@@ -49,6 +49,22 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* The strip the renderer draws where the OS title bar used to be. Dragging it
+   moves the window; anything interactive inside it opts back out. The OS keeps
+   the window controls over its right end (left, on macOS), and the env() values
+   say exactly where, so the strip never puts content under them. */
+.title-bar {
+    -webkit-app-region: drag;
+    height: env(titlebar-area-height, 36px);
+    padding-left: env(titlebar-area-x, 0px);
+    width: env(titlebar-area-width, 100%);
+}
+.title-bar button,
+.title-bar input,
+.title-bar a {
+    -webkit-app-region: no-drag;
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

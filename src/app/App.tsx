@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import icon from "@/assets/asdf-icon.svg";
 import { Button } from "@/components/ui/button";
 
 import { NewSessionDialog } from "@/features/sessions/components/NewSessionDialog";
@@ -12,6 +13,7 @@ import { TerminalPane } from "@/features/terminal/components/TerminalPane";
 import { UpdateChip } from "@/features/updater/components/UpdateChip";
 import { UpdateDialog } from "@/features/updater/components/UpdateDialog";
 import { useUpdater } from "@/features/updater/use-updater";
+import { platform } from "@/ipc/platform";
 import { NewProjectDialog } from "./NewProjectDialog";
 import { SettingsDialog, type Theme } from "./SettingsDialog";
 
@@ -25,21 +27,32 @@ export function App() {
 	const [theme, setTheme] = useState<Theme>("system");
 
 	useEffect(() => {
-		const root = document.documentElement;
-		const dark =
-			theme === "dark" ||
-			(theme === "system" &&
-				globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches);
-		root.classList.toggle("dark", Boolean(dark));
+		const media = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+		const apply = () => {
+			const dark = theme === "dark" || (theme === "system" && !!media?.matches);
+			document.documentElement.classList.toggle("dark", dark);
+			// The window controls sit outside the DOM, so they are told separately.
+			void platform.setTitleBarTheme(dark);
+		};
+		apply();
+		// "System" has to keep following the OS after mount, not just read it once.
+		media?.addEventListener("change", apply);
+		return () => media?.removeEventListener("change", apply);
 	}, [theme]);
 
 	const active = sessions.activeSession;
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+			{/* Drawn by us, dragged by the OS. The window controls are overlaid on
+			    its right end, and the CSS keeps the strip clear of them. */}
+			<div className="title-bar flex shrink-0 select-none items-center gap-2 border-b px-3 text-muted-foreground text-xs">
+				<img src={icon} alt="" className="size-4" draggable={false} />
+				<span className="font-medium">asdf</span>
+			</div>
+
 			<div className="flex min-h-0 flex-1">
-				{/* No title bar: the window already has one. Settings sits at the foot
-				    of the sidebar, out of the way of the work. */}
+				{/* Settings sits at the foot of the sidebar, out of the way of the work. */}
 				<div className="flex w-64 shrink-0 flex-col border-r bg-muted/30">
 					<SessionSidebar
 						tree={sessions.tree}
