@@ -17,13 +17,13 @@ UI copy is different: it never goes in a component. Add the key to
 ## Setup
 
 - Node 22+ and [pnpm](https://pnpm.io)
-- [Rust](https://rustup.rs) stable with `clippy` and `rustfmt`
+- Xcode Command Line Tools (macOS) or Visual Studio Build Tools 2022 with the
+  "Desktop development with C++" workload (Windows), so node-pty can compile
 - Xcode Command Line Tools (macOS)
 
 ```sh
-rustup component add clippy rustfmt
 pnpm install
-pnpm tauri dev
+pnpm dev
 ```
 
 ## Before you open a pull request
@@ -33,8 +33,7 @@ pnpm lint
 pnpm typecheck
 pnpm knip
 pnpm build
-pnpm rust:lint
-pnpm rust:test
+pnpm build
 ```
 
 The git hooks run most of this for you, and CI runs all of it. Do not use
@@ -46,7 +45,7 @@ Layers depend downward only and the boundaries are enforced by `biome.json`, so
 a cross-layer import fails `pnpm lint` rather than being caught in review. Read
 [`.claude/rules/architecture.md`](.claude/rules/architecture.md) before adding a
 directory — in particular, features never import each other, and only
-`src/ipc/**` may call Tauri.
+`src/ipc/**` may reach the main process.
 
 ## Commits
 
@@ -82,8 +81,7 @@ is not decoration:
 
 [release-please](https://github.com/googleapis/release-please) keeps a
 `chore(main): release x.y.z` pull request open and rewrites it as commits land
-on `main`. It bumps `package.json`, `src-tauri/Cargo.toml` and
-`src-tauri/tauri.conf.json` together, and writes `CHANGELOG.md`.
+on `main`. It bumps `package.json` and writes `CHANGELOG.md`.
 
 Nothing ships until a human merges that pull request. Merging it tags the
 release and publishes a GitHub release; a matrix build then attaches installers

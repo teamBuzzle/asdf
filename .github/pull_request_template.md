@@ -13,7 +13,7 @@
 
 ## Impact
 
-- Scope: <!-- affected area, e.g. ipc layer, workspace feature, Tauri shell -->
+- Scope: <!-- affected area, e.g. ipc layer, workspace feature, Electron main -->
 - Risk: <!-- low / medium / high -->
 - Rollback: <!-- how to revert -->
 

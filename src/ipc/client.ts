@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { AppError, WorkspaceInfo } from "./bindings";
+import { bridge } from "./bridge";
 
 export type IpcResult<T> =
 	| { ok: true; value: T }
@@ -12,12 +12,17 @@ function toAppError(thrown: unknown): AppError {
 	return { kind: "io", message: String(thrown) };
 }
 
-async function call<T>(
+/**
+ * Handlers in the main process already return an `IpcResult`, so the catch here
+ * only covers the transport itself failing — a channel with no handler, or a
+ * main process that has gone away.
+ */
+export async function call<T>(
 	command: string,
 	args?: Record<string, unknown>,
 ): Promise<IpcResult<T>> {
 	try {
-		return { ok: true, value: await invoke<T>(command, args) };
+		return (await bridge.invoke(command, args)) as IpcResult<T>;
 	} catch (thrown) {
 		return { ok: false, error: toAppError(thrown) };
 	}

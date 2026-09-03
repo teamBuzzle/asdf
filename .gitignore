@@ -31,3 +31,7 @@ CLAUDE.local.md
 
 # Registry credentials
 .npmrc
+
+# Electron build output
+out
+release

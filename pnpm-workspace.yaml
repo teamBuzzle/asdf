@@ -2,3 +2,7 @@
 onlyBuiltDependencies:
   - esbuild
   - "@biomejs/biome"
+  # Electron downloads its binary in a postinstall step, and node-pty compiles a
+  # native addon. Both are dead without their build script.
+  - electron
+  - node-pty
