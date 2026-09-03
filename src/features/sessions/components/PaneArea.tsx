@@ -249,8 +249,10 @@ function SessionBody({
 	return (
 		<>
 			{/* No toolbar: the tab names the session and the status bar carries the
-			    branch, so a third row would only repeat them. */}
-			<div className="min-h-0 flex-1 overflow-auto">{children}</div>
+			    branch, so a third row would only repeat them. A one-cell grid, not a
+			    block: the terminal positions its children absolutely and needs the
+			    slot to give it a height. */}
+			<div className="grid min-h-0 flex-1 overflow-hidden">{children}</div>
 
 			{session.blockedOn && session.status === "waiting" && (
 				<div className="flex shrink-0 items-center gap-2 border-amber-500/30 border-t bg-amber-500/10 px-3 py-1.5">

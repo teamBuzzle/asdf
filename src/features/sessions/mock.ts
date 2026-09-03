@@ -119,7 +119,7 @@ const raw: RawSession[] = [
 		behind: 0,
 		agent: "claude · sonnet",
 		status: "waiting",
-		blockedOn: "`rm -rf dist` 실행할까요?",
+		blockedOn: "`pnpm install` 실행할까요?",
 		tree: webTree,
 		sources: webSources,
 		files: [

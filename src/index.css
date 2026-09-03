@@ -129,3 +129,12 @@
     @apply font-sans;
     }
 }
+/* The terminal keeps its scrollback and its wheel; only the bar is hidden, so
+   the emulator does not sit next to a strip of chrome it did not draw. */
+.xterm-viewport {
+  scrollbar-width: none;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+  display: none;
+}
