@@ -1,4 +1,4 @@
-import { Minus, Settings, Square, X } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import icon from "@/assets/asdf-icon.svg";
@@ -16,6 +16,37 @@ import { useUpdater } from "@/features/updater/use-updater";
 import { platform } from "@/ipc/platform";
 import { NewProjectDialog } from "./NewProjectDialog";
 import { SettingsDialog, type Theme } from "./SettingsDialog";
+
+/**
+ * The caption glyphs, drawn the way Windows draws its own: ten pixels, one
+ * pixel of stroke, and the straight ones snapped to the pixel grid. An icon
+ * font scaled down to this size lands on half pixels and blurs.
+ */
+const GLYPH = {
+	minimize: (
+		<path d="M0.5 5.5h9" stroke="currentColor" shapeRendering="crispEdges" />
+	),
+	maximize: (
+		<rect
+			x="0.5"
+			y="0.5"
+			width="9"
+			height="9"
+			fill="none"
+			stroke="currentColor"
+			shapeRendering="crispEdges"
+		/>
+	),
+	close: <path d="M0.5 0.5l9 9M9.5 0.5l-9 9" stroke="currentColor" />,
+} as const;
+
+function WindowGlyph({ kind }: { kind: keyof typeof GLYPH }) {
+	return (
+		<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+			{GLYPH[kind]}
+		</svg>
+	);
+}
 
 export function App() {
 	const { t } = useTranslation();
@@ -60,7 +91,7 @@ export function App() {
 							onClick={platform.window.minimize}
 							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
 						>
-							<Minus className="size-3.5" />
+							<WindowGlyph kind="minimize" />
 						</button>
 						<button
 							type="button"
@@ -68,7 +99,7 @@ export function App() {
 							onClick={platform.window.maximize}
 							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
 						>
-							<Square className="size-3" />
+							<WindowGlyph kind="maximize" />
 						</button>
 						<button
 							type="button"
@@ -76,7 +107,7 @@ export function App() {
 							onClick={platform.window.close}
 							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-red-600 hover:text-white"
 						>
-							<X className="size-4" />
+							<WindowGlyph kind="close" />
 						</button>
 					</div>
 				)}
