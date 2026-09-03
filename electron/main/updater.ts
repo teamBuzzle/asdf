@@ -1,3 +1,5 @@
+import { appendFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
 import { app, type BrowserWindow } from "electron";
 import electronUpdater from "electron-updater";
 import { UPDATER_PROGRESS_EVENT, type UpdateInfo } from "@/ipc/bindings";
@@ -8,6 +10,36 @@ import { fail, type IpcResult, ok } from "./result";
 const { autoUpdater } = electronUpdater;
 
 /**
+ * Where electron-updater's own account of what it did ends up. Without this a
+ * user saying "updates don't work" leaves nothing to look at: every failure is
+ * reported to the renderer as one line and the rest is discarded.
+ *
+ * ponytail: append-only, no rotation. Add rotation when the file is the
+ * problem, not before.
+ */
+function fileLogger() {
+	const dir = app.getPath("logs");
+	const file = path.join(dir, "updater.log");
+	const write = (level: string, message: unknown) => {
+		try {
+			mkdirSync(dir, { recursive: true });
+			appendFileSync(
+				file,
+				`${new Date().toISOString()} ${level} ${String(message)}\n`,
+			);
+		} catch {
+			// Logging must never be the reason an update fails.
+		}
+	};
+	return {
+		info: (message: unknown) => write("info", message),
+		warn: (message: unknown) => write("warn", message),
+		error: (message: unknown) => write("error", message),
+		debug: () => {},
+	};
+}
+
+/**
  * Wraps electron-updater in the three calls the renderer's `Update` facade
  * makes. Downloading and installing are separate steps on purpose: the user
  * chooses when a ready update is applied, including "on quit".
@@ -15,6 +47,7 @@ const { autoUpdater } = electronUpdater;
 export function createUpdater(window: () => BrowserWindow | null) {
 	autoUpdater.autoDownload = false;
 	autoUpdater.autoInstallOnAppQuit = false;
+	autoUpdater.logger = fileLogger();
 
 	// An EventEmitter with no `error` listener rethrows, which would take the main
 	// process down for a failure the renderer already handles through the result

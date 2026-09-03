@@ -10,14 +10,19 @@ const state = {
 	listeners: new Map<string, (arg: unknown) => void>(),
 };
 
-vi.mock("electron", () => ({
-	app: {
-		get isPackaged() {
-			return state.isPackaged;
+vi.mock("electron", async () => {
+	const { tmpdir } = await import("node:os");
+	const path = await import("node:path");
+	return {
+		app: {
+			get isPackaged() {
+				return state.isPackaged;
+			},
+			getVersion: () => state.version,
+			getPath: () => path.join(tmpdir(), "asdf-updater-test-logs"),
 		},
-		getVersion: () => state.version,
-	},
-}));
+	};
+});
 
 vi.mock("electron-updater", () => ({
 	default: {
@@ -35,6 +40,10 @@ vi.mock("electron-updater", () => ({
 }));
 
 const { createUpdater } = await import("./updater");
+const mocked = (await import("electron-updater")).default
+	.autoUpdater as unknown as {
+	logger: { error(message: unknown): void } | null;
+};
 
 const window = () =>
 	({
@@ -152,6 +161,20 @@ describe("createUpdater", () => {
 		expect(updater.install()).toEqual({ ok: true, value: null });
 		expect(state.quitAndInstall).toHaveBeenCalledWith(true, true);
 		expect(updater.installing).toBe(true);
+	});
+
+	it("keeps a log electron-updater writes to, for when a user reports a failure", async () => {
+		const { readFileSync, rmSync } = await import("node:fs");
+		const path = await import("node:path");
+		const { tmpdir } = await import("node:os");
+		const dir = path.join(tmpdir(), "asdf-updater-test-logs");
+		rmSync(dir, { recursive: true, force: true });
+
+		createUpdater(window);
+		mocked.logger?.error("feed returned 404");
+
+		const written = readFileSync(path.join(dir, "updater.log"), "utf8");
+		expect(written).toMatch(/^\S+ error feed returned 404\n$/);
 	});
 
 	it("clears the flag when the installer refuses to start", () => {
