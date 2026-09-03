@@ -22,7 +22,9 @@ pub struct Output {
 struct Session {
     master: Box<dyn portable_pty::MasterPty + Send>,
     writer: Box<dyn Write + Send>,
-    child: Box<dyn portable_pty::Child + Send + Sync>,
+    /// The child itself belongs to the thread waiting on it, so the registry
+    /// keeps only the handle it needs to end the shell.
+    killer: Box<dyn portable_pty::ChildKiller + Send + Sync>,
 }
 
 #[derive(Default)]
@@ -33,7 +35,9 @@ pub struct Registry {
 
 impl Registry {
     /// Spawns a shell on a new pty. `on_output` is called from a reader thread
-    /// for each chunk, then `on_exit` once when the shell is gone.
+    /// for each chunk, and `on_exit` once if the shell ends on its own. Closing
+    /// the session through [`Registry::close`] is silent — the caller already
+    /// knows.
     pub fn open<F, E>(
         self: &Arc<Self>,
         cwd: Option<String>,
@@ -63,10 +67,11 @@ impl Registry {
         // Without it many fall back to a dumb terminal with no colour.
         command.env("TERM", "xterm-256color");
 
-        let child = pair
+        let mut child = pair
             .slave
             .spawn_command(command)
             .map_err(|err| AppError::Terminal(err.to_string()))?;
+        let killer = child.clone_killer();
         let mut reader = pair
             .master
             .try_clone_reader()
@@ -82,11 +87,10 @@ impl Registry {
             Session {
                 master: pair.master,
                 writer,
-                child,
+                killer,
             },
         );
 
-        let registry = Arc::clone(self);
         std::thread::spawn(move || {
             let mut buffer = [0u8; 8192];
             // A read can split a multi-byte character. Carry the incomplete tail
@@ -109,10 +113,22 @@ impl Registry {
                     }
                 }
             }
-            registry.sessions.lock().unwrap().remove(&id);
-            // Without this the UI keeps showing a live terminal over a dead
-            // shell, and typing into it silently does nothing.
-            on_exit(id);
+        });
+
+        // The shell ending is reported by waiting on the child, not by waiting
+        // for the reader to hit EOF. On Windows the pty's output pipe stays open
+        // for as long as the pty does, so EOF never arrives and the UI would keep
+        // showing a live terminal over a dead shell, silently swallowing input.
+        let registry = Arc::clone(self);
+        std::thread::spawn(move || {
+            let _ = child.wait();
+            // Dropping the session closes the pty, which is what ends the reader
+            // thread. Whoever removes the entry owns the notification, so a
+            // session closed through `close` stays silent.
+            let session = registry.sessions.lock().unwrap().remove(&id);
+            if session.is_some() {
+                on_exit(id);
+            }
         });
 
         Ok(id)
@@ -146,8 +162,12 @@ impl Registry {
     }
 
     pub fn close(&self, id: u32) -> Result<(), AppError> {
-        if let Some(mut session) = self.sessions.lock().unwrap().remove(&id) {
-            let _ = session.child.kill();
+        // Bound to its own statement so the guard is released here: killing the
+        // shell and dropping the pty both wait on threads that take this same
+        // lock, and holding it across them deadlocks.
+        let session = self.sessions.lock().unwrap().remove(&id);
+        if let Some(mut session) = session {
+            let _ = session.killer.kill();
         }
         Ok(())
     }
