@@ -1,3 +1,5 @@
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildTree, parseDiff, parseStatus, snapshot } from "./repo";
@@ -65,6 +67,25 @@ describe("snapshot", () => {
 		expect(result.value.root).toBe(repoRoot);
 		expect(result.value.branch).toMatch(/\S/);
 		expect(result.value.tree.some((node) => node.name === "main")).toBe(true);
+	});
+
+	it("lists a plain folder whole, files and nested folders alike", async () => {
+		const dir = await mkdtemp(path.join(tmpdir(), "asdf-walk-"));
+		await mkdir(path.join(dir, "deep", "deeper"), { recursive: true });
+		await writeFile(path.join(dir, "z.txt"), "");
+		await writeFile(path.join(dir, ".dot"), "");
+		await writeFile(path.join(dir, "deep", "deeper", "leaf.txt"), "");
+		const result = await snapshot(dir);
+		if (!result.ok) throw new Error(result.error.message);
+		expect(result.value.root).toBeNull();
+		expect(result.value.tree.map((node) => node.name)).toEqual([
+			"deep",
+			".dot",
+			"z.txt",
+		]);
+		expect(result.value.tree[0]).toMatchObject({
+			children: [{ name: "deeper", children: [{ name: "leaf.txt" }] }],
+		});
 	});
 
 	it("walks a plain folder", async () => {

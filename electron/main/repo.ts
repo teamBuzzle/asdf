@@ -81,16 +81,28 @@ const TREE_LIMIT = 1500;
 const TREE_DEPTH = 4;
 const SKIP = new Set([".git", "node_modules", ".DS_Store"]);
 
-async function walk(dir: string, depth: number, into: string[]) {
-	if (depth > TREE_DEPTH || into.length >= TREE_LIMIT) return;
-	const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
-	for (const entry of entries) {
-		if (SKIP.has(entry.name)) continue;
-		const full = path.join(dir, entry.name);
-		if (entry.isDirectory()) await walk(full, depth + 1, into);
-		else if (entry.isFile()) into.push(full);
-		if (into.length >= TREE_LIMIT) return;
+// Breadth first, so the folder the shell is in is always listed whole and
+// the cap only ever trims what is deep inside it.
+async function walk(root: string): Promise<string[]> {
+	const found: string[] = [];
+	let level = [root];
+	for (let depth = 0; depth <= TREE_DEPTH && level.length > 0; depth++) {
+		const next: string[] = [];
+		for (const dir of level) {
+			const entries = await readdir(dir, { withFileTypes: true }).catch(
+				() => [],
+			);
+			for (const entry of entries) {
+				if (SKIP.has(entry.name)) continue;
+				const full = path.join(dir, entry.name);
+				if (entry.isDirectory()) next.push(full);
+				else if (entry.isFile()) found.push(full);
+			}
+		}
+		if (found.length >= TREE_LIMIT) break;
+		level = next;
 	}
+	return found;
 }
 
 /** Files as a tree, folders first, the way every explorer sorts. */
@@ -246,8 +258,7 @@ export async function snapshot(cwd: string): Promise<IpcResult<RepoSnapshot>> {
 			.catch(() => null);
 
 		if (!root) {
-			const files: string[] = [];
-			await walk(cwd, 0, files);
+			const files = await walk(cwd);
 			const relative = files.map((file) =>
 				path.relative(cwd, file).split(path.sep).join("/"),
 			);
