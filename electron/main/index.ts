@@ -112,6 +112,10 @@ ipcMain.handle("updater://download", () => updater.download());
 ipcMain.handle("updater://install", () => updater.install());
 
 ipcMain.handle("app://relaunch", () => {
+	// `quitAndInstall` already quits and starts the new build. Relaunching on top
+	// of it races the installer for the same files, and the caller cannot tell
+	// the two paths apart — it installs, then asks for a restart either way.
+	if (updater.installing) return ok(null);
 	app.relaunch();
 	closing = true;
 	app.quit();

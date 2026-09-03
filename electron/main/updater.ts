@@ -16,6 +16,11 @@ export function createUpdater(window: () => BrowserWindow | null) {
 	autoUpdater.autoDownload = false;
 	autoUpdater.autoInstallOnAppQuit = false;
 
+	// An EventEmitter with no `error` listener rethrows, which would take the main
+	// process down for a failure the renderer already handles through the result
+	// of whichever call provoked it.
+	autoUpdater.on("error", () => {});
+
 	autoUpdater.on("download-progress", (progress) => {
 		window()?.webContents.send(UPDATER_PROGRESS_EVENT, {
 			transferred: progress.transferred,
@@ -23,16 +28,27 @@ export function createUpdater(window: () => BrowserWindow | null) {
 		});
 	});
 
+	/** Set once `quitAndInstall` is on its way, so nothing else fights it. */
+	let installing = false;
+
 	return {
+		/** True while the installer is taking over; the app is already quitting. */
+		get installing() {
+			return installing;
+		},
+
 		async check(): Promise<IpcResult<UpdateInfo | null>> {
 			// An unpackaged build has no release to compare against, and asking
 			// throws rather than reporting "up to date".
 			if (!app.isPackaged) return ok(null);
 			try {
 				const result = await autoUpdater.checkForUpdates();
-				if (!result?.updateInfo) return ok(null);
+				// electron-updater decides what counts as an update. Comparing the two
+				// version strings here instead would offer a downgrade as an upgrade
+				// whenever the published release is behind the installed build.
+				if (!result?.isUpdateAvailable) return ok(null);
+
 				const { version, releaseNotes } = result.updateInfo;
-				if (version === app.getVersion()) return ok(null);
 				return ok({
 					version,
 					currentVersion: app.getVersion(),
@@ -54,17 +70,24 @@ export function createUpdater(window: () => BrowserWindow | null) {
 
 		install(): IpcResult<null> {
 			try {
-				// The second argument keeps the installer silent on Windows, matching
-				// the passive install mode the app shipped with.
+				installing = true;
+				// Silent, and running again afterwards: between them these are what
+				// the passive install mode the app shipped with did.
 				autoUpdater.quitAndInstall(true, true);
 				return ok(null);
 			} catch (thrown) {
+				installing = false;
 				return fail(updateError(thrown));
 			}
 		},
 	};
 }
 
+/**
+ * Passes electron-updater's own wording through untouched. The renderer sorts a
+ * failed integrity check from an ordinary network failure by reading it, so
+ * rewriting the message here would blind it.
+ */
 function updateError(thrown: unknown) {
 	return {
 		kind: "io" as const,
