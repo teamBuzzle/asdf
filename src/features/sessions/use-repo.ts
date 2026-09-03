@@ -19,11 +19,17 @@ export function useRepo(cwd: string | null) {
 	const root = snapshot?.root ?? null;
 	const seen = useRef<string | null>(null);
 
+	// A poll that returns the same answer must not re-render the tree: the
+	// snapshot is only swapped when its content differs.
 	const refreshGit = useCallback(async () => {
-		if (!cwd) return;
+		if (!cwd || document.hidden) return;
 		const result = await ipc.repoSnapshot(cwd);
 		if (result.ok) {
-			setSnapshot(result.value);
+			setSnapshot((previous) =>
+				previous && JSON.stringify(previous) === JSON.stringify(result.value)
+					? previous
+					: result.value,
+			);
 			setError(null);
 		} else setError(result.error.message);
 	}, [cwd]);

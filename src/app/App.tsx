@@ -228,7 +228,9 @@ export function App() {
 							projects={sessions.projects}
 							sessions={sessions.sessions}
 							activeProjectId={sessions.activeProjectId}
+							activeSessionId={active?.id}
 							onSelectProject={sessions.selectProject}
+							onOpenSession={sessions.openSession}
 							onNewWorkspace={newWorkspace}
 							onRemoveWorkspace={sessions.removeWorkspace}
 						/>

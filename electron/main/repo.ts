@@ -74,10 +74,11 @@ export async function cwdOf(pid: number): Promise<string | null> {
 	return null;
 }
 
-// ponytail: 4 000 entries and 6 levels is plenty for a panel; a real explorer
-// would page. Raise when someone opens a monorepo root and complains.
-const TREE_LIMIT = 4000;
-const TREE_DEPTH = 6;
+// ponytail: 1 500 entries and 4 levels for a folder git does not track (a home
+// directory, say), re-walked every poll; a real explorer would page and watch.
+// Raise when someone opens a monorepo root and complains.
+const TREE_LIMIT = 1500;
+const TREE_DEPTH = 4;
 const SKIP = new Set([".git", "node_modules", ".DS_Store"]);
 
 async function walk(dir: string, depth: number, into: string[]) {

@@ -38,7 +38,10 @@ export function FileExplorer({
 }) {
 	const { t } = useTranslation();
 	const [query, setQuery] = useState("");
-	const [closed, setClosed] = useState<ReadonlySet<string>>(new Set());
+	// Folders start closed: a tree that opens itself is a wall of rows, and it
+	// would re-open on every refresh. What the user opened stays open, keyed by
+	// path, across snapshots.
+	const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
 	const needle = query.trim().toLowerCase();
 
@@ -97,9 +100,9 @@ export function FileExplorer({
 					<Tree
 						nodes={tree}
 						depth={0}
-						closed={closed}
+						open={open}
 						onToggle={(path) =>
-							setClosed((previous) => {
+							setOpen((previous) => {
 								const next = new Set(previous);
 								if (!next.delete(path)) next.add(path);
 								return next;
@@ -116,13 +119,13 @@ export function FileExplorer({
 function Tree({
 	nodes,
 	depth,
-	closed,
+	open,
 	onToggle,
 	onOpen,
 }: {
 	nodes: FileNode[];
 	depth: number;
-	closed: ReadonlySet<string>;
+	open: ReadonlySet<string>;
 	onToggle: (path: string) => void;
 	onOpen: (path: string) => void;
 }) {
@@ -133,28 +136,28 @@ function Tree({
 					<li key={node.path}>
 						<button
 							type="button"
-							aria-expanded={!closed.has(node.path)}
+							aria-expanded={open.has(node.path)}
 							onClick={() => onToggle(node.path)}
 							style={{ paddingLeft: depth * 12 + 8 }}
 							className="flex w-full items-center gap-1.5 rounded-md py-1 pr-2 text-left text-xs hover:bg-accent/60"
 						>
-							{closed.has(node.path) ? (
-								<ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-							) : (
+							{open.has(node.path) ? (
 								<ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
-							)}
-							{closed.has(node.path) ? (
-								<Folder className="size-3.5 shrink-0 text-muted-foreground" />
 							) : (
+								<ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+							)}
+							{open.has(node.path) ? (
 								<FolderOpen className="size-3.5 shrink-0 text-muted-foreground" />
+							) : (
+								<Folder className="size-3.5 shrink-0 text-muted-foreground" />
 							)}
 							<span className="truncate">{node.name}</span>
 						</button>
-						{!closed.has(node.path) && (
+						{open.has(node.path) && (
 							<Tree
 								nodes={node.children}
 								depth={depth + 1}
-								closed={closed}
+								open={open}
 								onToggle={onToggle}
 								onOpen={onOpen}
 							/>

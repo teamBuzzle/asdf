@@ -71,6 +71,20 @@ export function useSessions() {
 		}));
 	}, []);
 
+	// A terminal picked from the sidebar comes to the front in its workspace.
+	const openSession = useCallback(
+		(sessionId: string) => {
+			const session = sessions.find((item) => item.id === sessionId);
+			if (!session) return;
+			openIn(session.projectId, {
+				kind: "session",
+				id: `session:${sessionId}`,
+				sessionId,
+			});
+		},
+		[sessions, openIn],
+	);
+
 	const openFile = useCallback(
 		(sessionId: string, dir: string, path: string) => {
 			const session = sessions.find((item) => item.id === sessionId);
@@ -217,6 +231,7 @@ export function useSessions() {
 		focusPane,
 		activeSession,
 		activeProject,
+		openSession,
 		openFile,
 		openIssue,
 		openPull,
