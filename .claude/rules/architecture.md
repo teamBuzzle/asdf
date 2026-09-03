@@ -50,6 +50,65 @@ src-tauri/src/
 Commands hold no logic. That is what makes `cargo test` possible without
 spinning up a Tauri runtime — see `workspace/mod.rs` tests.
 
+## Native IME (macOS)
+
+`src-tauri/src/ime/` exists because WebKit does not deliver usable composition
+events, so the same xterm.js code that composes Korean correctly under Chromium
+loses characters under WKWebView. Tauri pins WKWebView on macOS, so the fix
+cannot live in the webview. Verified by loading one page in Safari and Chrome:
+identical xterm.js, `안녕하세요` in Chrome, `ㅇㄴㅎ세요` in Safari.
+
+A local key monitor runs ahead of the responder chain. When the active input
+source is not a CJK one the event is handed straight back, so xterm keeps its own
+handling of arrows, control sequences and everything else — do not widen that.
+Only CJK input goes through AppKit's text machinery, and `doCommandBySelector:`
+translates the keys the IME declines, since those no longer reach the webview.
+
+Windows uses WebView2 (Chromium) and composes correctly, so `install()` is a
+no-op there and the objc2 dependencies are macOS-only.
+
+**Known defect:** the first keystroke of a session is committed rather than
+composed, so `안녕하세요` arrives as `ㅇㅏ녕하세요`. Everything after the first
+syllable is correct.
+
+The trace shows the first key arriving with `chars="d"` while the input source
+already reports Korean: the keyboard layout has not been applied to the process
+yet, and the input method session is not up. It needs elapsed time, not a
+particular call. Four attempts are recorded here so nobody repeats them:
+
+| Attempt | Result |
+|---|---|
+| Warm up on mouse and modifier events | Those events never reach the monitor |
+| Synthetic key event at install | Completes the handshake but leaves modifier state wrong — every character doubled and upper-cased |
+| Feed the first key through twice, first pass muted | Both passes still commit; the handshake is time-based, not call-based |
+| Query the input source differently (`currentInputContext`, then Carbon TIS) | The source was always reported correctly; this was never the problem |
+| Have the user click the terminal before typing | No effect |
+| Take first responder while a CJK source is active, so AppKit binds the context | Binding is not synchronous enough to help the keystroke that triggers it, and holding first responder stops the webview receiving anything — English input broke entirely. Reverted. |
+| Bounce first responder to the client and straight back on `NSWindowDidBecomeKey`, betting the session outlives the focus change | The webview kept working, but the session was not established: the first key still arrived uncomposed |
+| Spend the handshake on a synthetic *mouse* event, which carries no characters or modifiers to strand | No effect. A mouse event does not establish the session |
+
+Apple's documentation explains why: an input context binds to its client, and
+the input method session is established, when that client **becomes first
+responder in the key window**. Ghostty, Alacritty and WezTerm avoid this because
+their view is the first responder. Ours is not, so `activate()` is only a partial
+substitute and the session is created lazily on the first `handleEvent`.
+
+Seven attempts are recorded above. The pattern across them: the session is
+established only by a real keystroke reaching `handleEvent`, and that keystroke
+is consumed doing it. Nothing that is not a real keystroke — synthetic key
+events, mouse events, focus changes, `activate()` — substitutes for it.
+
+The remaining option is to hold first responder permanently and reimplement
+everything xterm does with a keystroke: control chords, tab completion, history
+search, every escape sequence. That is a large, risky change for one character
+at session start, and it trades a cosmetic defect for a class of functional
+ones. Do not start it without deciding that trade deliberately.
+
+`ASDF_IME_TRACE=1` logs every callback; `scripts/ime-check.sh` drives real
+keystrokes through the IME and asserts what the pty received. Reach for the trace
+before theorising — four fixes were attempted from guesswork before it existed,
+and two of them made things worse.
+
 ## The IPC contract
 
 `src/ipc/bindings.ts` mirrors the Rust types by hand. It is deliberately not

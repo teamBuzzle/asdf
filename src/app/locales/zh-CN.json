@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "打开",
-		"pathLabel": "工作区路径",
-		"idle": "请选择要打开的文件夹。",
-		"opening": "正在打开…"
-	},
 	"update": {
 		"chip": {
 			"available": "更新 {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "分组",
 			"groupPlaceholder": "工作",
-			"add": "添加"
+			"add": "添加",
+			"check": "检查",
+			"checkHint": "指向一个 git 仓库。",
+			"checking": "检查中…"
 		},
 		"sidePanel": "项目面板"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "基于 {{branch}}",
 		"worktrees": "工作树",
 		"changes": "更改"
+	},
+	"terminal": {
+		"starting": "正在启动 shell…",
+		"failed": "无法启动 shell。",
+		"exited": "shell 已退出。"
 	}
 }

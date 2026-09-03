@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "Open",
-		"pathLabel": "Workspace path",
-		"idle": "Pick a folder to open.",
-		"opening": "Opening…"
-	},
 	"update": {
 		"chip": {
 			"available": "Update {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "Group",
 			"groupPlaceholder": "Work",
-			"add": "Add"
+			"add": "Add",
+			"check": "Check",
+			"checkHint": "Point at a git repository.",
+			"checking": "Checking…"
 		},
 		"sidePanel": "Project panel"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "Based on {{branch}}",
 		"worktrees": "Worktrees",
 		"changes": "Changes"
+	},
+	"terminal": {
+		"starting": "Starting shell…",
+		"failed": "The shell could not be started.",
+		"exited": "The shell has exited."
 	}
 }

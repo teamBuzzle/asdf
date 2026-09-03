@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "開く",
-		"pathLabel": "ワークスペースのパス",
-		"idle": "開くフォルダーを選択してください。",
-		"opening": "開いています…"
-	},
 	"update": {
 		"chip": {
 			"available": "アップデート {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "グループ",
 			"groupPlaceholder": "仕事",
-			"add": "追加"
+			"add": "追加",
+			"check": "確認",
+			"checkHint": "git リポジトリを指定してください。",
+			"checking": "確認中…"
 		},
 		"sidePanel": "プロジェクトパネル"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "{{branch}} が基点",
 		"worktrees": "ワークツリー",
 		"changes": "変更"
+	},
+	"terminal": {
+		"starting": "シェルを起動中…",
+		"failed": "シェルを起動できませんでした。",
+		"exited": "シェルが終了しました。"
 	}
 }

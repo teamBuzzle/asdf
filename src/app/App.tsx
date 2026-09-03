@@ -8,6 +8,7 @@ import { PaneArea } from "@/features/sessions/components/PaneArea";
 import { SessionSidebar } from "@/features/sessions/components/SessionSidebar";
 import { SidePanel } from "@/features/sessions/components/SidePanel";
 import { useSessions } from "@/features/sessions/use-sessions";
+import { TerminalPane } from "@/features/terminal/components/TerminalPane";
 import { UpdateChip } from "@/features/updater/components/UpdateChip";
 import { UpdateDialog } from "@/features/updater/components/UpdateDialog";
 import { useUpdater } from "@/features/updater/use-updater";
@@ -78,7 +79,7 @@ export function App() {
 					onClose={sessions.closePane}
 					onOpenSession={sessions.openSession}
 					onNewSession={() => setSessionIn(sessions.activeProjectId)}
-					renderAgent={() => <AgentSlot />}
+					renderAgent={() => <TerminalPane />}
 					onReview={sessions.review}
 				/>
 
@@ -141,20 +142,6 @@ export function App() {
 				onInstallOnQuit={updater.installOnQuit}
 				onRetry={() => void updater.runCheck(true)}
 			/>
-		</div>
-	);
-}
-
-// Reserved for the terminal work, which is being built separately. This holds
-// the region and nothing else — no state, no process, no keyboard handling.
-function AgentSlot() {
-	const { t } = useTranslation();
-
-	return (
-		<div className="flex h-full items-center justify-center p-8">
-			<p className="max-w-xs text-center text-muted-foreground text-sm">
-				{t("session.agentPane.placeholder")}
-			</p>
 		</div>
 	);
 }

@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "열기",
-		"pathLabel": "워크스페이스 경로",
-		"idle": "열 폴더를 선택하세요.",
-		"opening": "여는 중…"
-	},
 	"update": {
 		"chip": {
 			"available": "업데이트 {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "그룹",
 			"groupPlaceholder": "회사일",
-			"add": "추가"
+			"add": "추가",
+			"check": "확인",
+			"checkHint": "git 저장소 폴더를 지정하세요.",
+			"checking": "확인 중…"
 		},
 		"sidePanel": "프로젝트 패널"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "{{branch}} 기준",
 		"worktrees": "워크트리",
 		"changes": "변경 사항"
+	},
+	"terminal": {
+		"starting": "셸을 시작하는 중…",
+		"failed": "셸을 시작하지 못했습니다.",
+		"exited": "셸이 종료되었습니다."
 	}
 }

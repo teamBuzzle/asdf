@@ -1,4 +1,3 @@
-import { produce } from "immer";
 import { useCallback, useMemo, useState } from "react";
 import { mockGroups, mockProjects, mockSessions } from "./mock";
 import type {
@@ -132,16 +131,13 @@ export function useSessions() {
 
 	const openIn = useCallback((projectId: string, pane: Pane) => {
 		setActiveProjectId(projectId);
-		setWindows(
-			produce((draft: Record<string, Window>) => {
-				const existing = draft[projectId] ?? { panes: [], activeId: "" };
-				if (!existing.panes.some((item) => item.id === pane.id)) {
-					existing.panes.push(pane);
-				}
-				existing.activeId = pane.id;
-				draft[projectId] = existing;
-			}),
-		);
+		setWindows((previous) => {
+			const current = previous[projectId] ?? { panes: [], activeId: "" };
+			const panes = current.panes.some((item) => item.id === pane.id)
+				? current.panes
+				: [...current.panes, pane];
+			return { ...previous, [projectId]: { panes, activeId: pane.id } };
+		});
 	}, []);
 
 	const openSession = useCallback(
@@ -197,36 +193,35 @@ export function useSessions() {
 
 	const focusPane = useCallback(
 		(id: string) => {
-			setWindows(
-				produce((draft: Record<string, Window>) => {
-					const current = draft[activeProjectId];
-					if (current) current.activeId = id;
-				}),
-			);
+			setWindows((previous) => {
+				const current = previous[activeProjectId];
+				if (!current) return previous;
+				return {
+					...previous,
+					[activeProjectId]: { ...current, activeId: id },
+				};
+			});
 		},
 		[activeProjectId],
 	);
 
 	const closePane = useCallback(
 		(id: string) => {
-			setWindows(
-				produce((draft: Record<string, Window>) => {
-					const current = draft[activeProjectId];
-					if (!current) return;
-					current.panes = current.panes.filter((pane) => pane.id !== id);
-					if (current.activeId === id) {
-						current.activeId =
-							current.panes[current.panes.length - 1]?.id ?? "";
-					}
-				}),
-			);
+			setWindows((previous) => {
+				const current = previous[activeProjectId];
+				if (!current) return previous;
+				const panes = current.panes.filter((pane) => pane.id !== id);
+				const activeId =
+					current.activeId === id
+						? (panes[panes.length - 1]?.id ?? "")
+						: current.activeId;
+				return { ...previous, [activeProjectId]: { panes, activeId } };
+			});
 		},
 		[activeProjectId],
 	);
 
 	const toggleNode = useCallback((key: string) => {
-		// Plain copy, not immer: immer needs enableMapSet() before it will touch a
-		// Set, and registering a plugin costs more than the three lines it saves.
 		setCollapsed((previous) => {
 			const next = new Set(previous);
 			if (!next.delete(key)) next.add(key);
@@ -236,12 +231,17 @@ export function useSessions() {
 
 	const review = useCallback(
 		(sessionId: string, path: string, state: ReviewState) => {
-			setSessions(
-				produce((draft: Session[]) => {
-					const session = draft.find((item) => item.id === sessionId);
-					const file = session?.files.find((item) => item.path === path);
-					if (file) file.review = state;
-				}),
+			setSessions((previous) =>
+				previous.map((session) =>
+					session.id === sessionId
+						? {
+								...session,
+								files: session.files.map((file) =>
+									file.path === path ? { ...file, review: state } : file,
+								),
+							}
+						: session,
+				),
 			);
 		},
 		[],
@@ -249,67 +249,57 @@ export function useSessions() {
 
 	// A project is made first; sessions are made inside one. The same repository
 	// under another group is a different project, which is why this matches both.
-	const createProject = useCallback((input: NewProjectInput) => {
-		const groupName = input.groupName.trim() || "미분류";
-		const name = input.name.trim();
-		let groupId = "";
+	const createProject = useCallback(
+		(input: NewProjectInput) => {
+			const groupName = input.groupName.trim() || "미분류";
+			const name = input.name.trim();
 
-		setGroups(
-			produce((draft: Group[]) => {
-				const existing = draft.find((group) => group.name === groupName);
-				if (existing) {
-					groupId = existing.id;
-					return;
-				}
-				groupId = `g${Date.now()}`;
-				draft.push({ id: groupId, name: groupName });
-			}),
-		);
+			const group = groups.find((item) => item.name === groupName);
+			const groupId = group?.id ?? `g${Date.now()}`;
+			if (!group)
+				setGroups((previous) => [
+					...previous,
+					{ id: groupId, name: groupName },
+				]);
 
-		setProjects(
-			produce((draft: Project[]) => {
-				const existing = draft.find(
-					(project) => project.name === name && project.groupId === groupId,
-				);
-				if (existing) {
-					setActiveProjectId(existing.id);
-					return;
-				}
-				const id = `p${Date.now()}`;
+			const project = projects.find(
+				(item) => item.name === name && item.groupId === groupId,
+			);
+			if (project) {
+				setActiveProjectId(project.id);
+				return;
+			}
+
+			const id = `p${Date.now()}`;
+			setProjects((previous) => [
+				...previous,
 				// Real branches come from git; a fresh checkout is on its default.
-				draft.push({
-					id,
-					name,
-					groupId,
-					branch: "main",
-					issues: [],
-					pulls: [],
-				});
-				setActiveProjectId(id);
-			}),
-		);
-	}, []);
+				{ id, name, groupId, branch: "main", issues: [], pulls: [] },
+			]);
+			setActiveProjectId(id);
+		},
+		[groups, projects],
+	);
 
 	const createSession = useCallback(
 		(input: NewSessionInput) => {
 			const id = `s${Date.now()}`;
-			setSessions(
-				produce((draft: Session[]) => {
-					draft.unshift({
-						id,
-						title: input.title.trim(),
-						projectId: input.projectId,
-						branch: slugify(input.title),
-						ahead: 0,
-						behind: 0,
-						agent: input.agent,
-						status: "idle",
-						files: [],
-						tree: [],
-						sources: {},
-					});
-				}),
-			);
+			setSessions((previous) => [
+				{
+					id,
+					title: input.title.trim(),
+					projectId: input.projectId,
+					branch: slugify(input.title),
+					ahead: 0,
+					behind: 0,
+					agent: input.agent,
+					status: "idle",
+					files: [],
+					tree: [],
+					sources: {},
+				},
+				...previous,
+			]);
 			openIn(input.projectId, {
 				kind: "session",
 				id: `session:${id}`,

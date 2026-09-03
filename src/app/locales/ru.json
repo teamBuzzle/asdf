@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "Открыть",
-		"pathLabel": "Путь к рабочей области",
-		"idle": "Выберите папку для открытия.",
-		"opening": "Открытие…"
-	},
 	"update": {
 		"chip": {
 			"available": "Обновить до {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "Группа",
 			"groupPlaceholder": "Работа",
-			"add": "Добавить"
+			"add": "Добавить",
+			"check": "Проверить",
+			"checkHint": "Укажите git-репозиторий.",
+			"checking": "Проверка…"
 		},
 		"sidePanel": "Панель проекта"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "На основе {{branch}}",
 		"worktrees": "Рабочие деревья",
 		"changes": "Изменения"
+	},
+	"terminal": {
+		"starting": "Запуск оболочки…",
+		"failed": "Не удалось запустить оболочку.",
+		"exited": "Оболочка завершила работу."
 	}
 }

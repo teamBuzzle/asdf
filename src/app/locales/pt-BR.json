@@ -2,12 +2,6 @@
 	"app": {
 		"title": "asdf"
 	},
-	"workspace": {
-		"open": "Abrir",
-		"pathLabel": "Caminho do espaço de trabalho",
-		"idle": "Escolha uma pasta para abrir.",
-		"opening": "Abrindo…"
-	},
 	"update": {
 		"chip": {
 			"available": "Atualizar para {{version}}",
@@ -118,7 +112,10 @@
 			"namePlaceholder": "web",
 			"group": "Grupo",
 			"groupPlaceholder": "Trabalho",
-			"add": "Adicionar"
+			"add": "Adicionar",
+			"check": "Verificar",
+			"checkHint": "Aponte para um repositório git.",
+			"checking": "Verificando…"
 		},
 		"sidePanel": "Painel do projeto"
 	},
@@ -160,5 +157,10 @@
 		"basedOn": "Baseada em {{branch}}",
 		"worktrees": "Worktrees",
 		"changes": "Alterações"
+	},
+	"terminal": {
+		"starting": "Iniciando o shell…",
+		"failed": "Não foi possível iniciar o shell.",
+		"exited": "O shell foi encerrado."
 	}
 }
