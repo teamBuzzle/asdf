@@ -9,7 +9,7 @@ export default defineConfig({
 		alias: { "@": path.resolve(__dirname, "./src") },
 	},
 	test: {
-		include: ["electron/**/*.test.ts"],
+		include: ["electron/**/*.test.ts", "src/**/*.test.ts"],
 		environment: "node",
 		// Spawning a real shell is slow on Windows, and these tests are worth the
 		// wait: the defects they cover only ever showed up against a real pty.

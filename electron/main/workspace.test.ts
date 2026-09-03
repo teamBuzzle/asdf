@@ -25,6 +25,7 @@ describe("workspace.open", () => {
 		if (!result.ok) throw new Error(result.error.message);
 		expect(result.value.name).not.toBe("");
 		expect(result.value.isGitRepo).toBe(false);
+		expect(result.value.branch).toBeNull();
 	});
 
 	it("detects a git repo", () => {
@@ -32,6 +33,7 @@ describe("workspace.open", () => {
 		if (!result.ok) throw new Error(result.error.message);
 		expect(result.value.isGitRepo).toBe(true);
 		expect(result.value.name).toBe(path.basename(repoRoot));
+		expect(result.value.branch).toMatch(/\S/);
 	});
 
 	it("resolves the path it reports", () => {

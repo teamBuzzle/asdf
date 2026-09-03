@@ -49,16 +49,16 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* The strip the renderer draws where the OS title bar used to be. Dragging it
-   moves the window and double-clicking it maximises; anything interactive
-   inside it opts back out. */
-.title-bar {
+/* There is no title bar: the top row of each column stands where it was.
+   Dragging those rows moves the window and double-clicking them maximises;
+   anything interactive inside them opts back out. */
+.drag-region {
     -webkit-app-region: drag;
-    height: 36px;
 }
-.title-bar button,
-.title-bar input,
-.title-bar a {
+.drag-region button,
+.drag-region input,
+.drag-region a,
+.drag-region [draggable="true"] {
     -webkit-app-region: no-drag;
 }
 

@@ -1,21 +1,29 @@
-import { Settings } from "lucide-react";
-import { useEffect, useState } from "react";
+import { PanelLeft, PanelRight, Settings } from "lucide-react";
+import {
+	Fragment,
+	type PointerEvent,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import { useTranslation } from "react-i18next";
-import icon from "@/assets/asdf-icon.svg";
 import { Button } from "@/components/ui/button";
 
-import { NewSessionDialog } from "@/features/sessions/components/NewSessionDialog";
 import { PaneArea } from "@/features/sessions/components/PaneArea";
 import { SessionSidebar } from "@/features/sessions/components/SessionSidebar";
 import { SidePanel } from "@/features/sessions/components/SidePanel";
+import { useRepo } from "@/features/sessions/use-repo";
 import { useSessions } from "@/features/sessions/use-sessions";
 import { TerminalPane } from "@/features/terminal/components/TerminalPane";
+import { useTerminalCwd } from "@/features/terminal/use-terminal-cwd";
 import { UpdateChip } from "@/features/updater/components/UpdateChip";
 import { UpdateDialog } from "@/features/updater/components/UpdateDialog";
 import { useUpdater } from "@/features/updater/use-updater";
 import { platform } from "@/ipc/platform";
-import { NewProjectDialog } from "./NewProjectDialog";
+import { cn } from "@/lib/utils";
+import { NewWorkspaceDialog } from "./NewWorkspaceDialog";
 import { SettingsDialog, type Theme } from "./SettingsDialog";
+import { useResizable } from "./use-resizable";
 
 /**
  * The caption glyphs, drawn the way Windows draws its own: ten pixels, one
@@ -48,14 +56,117 @@ function WindowGlyph({ kind }: { kind: keyof typeof GLYPH }) {
 	);
 }
 
+/**
+ * The caption buttons, drawn by us so minimise and maximise can hover grey
+ * while close hovers red — the OS overlay only lets close change colour.
+ * macOS keeps its traffic lights and never renders these.
+ */
+function WindowControls() {
+	const { t } = useTranslation();
+	return (
+		<div className="flex self-stretch">
+			<button
+				type="button"
+				aria-label={t("window.minimize")}
+				onClick={platform.window.minimize}
+				className="flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+			>
+				<WindowGlyph kind="minimize" />
+			</button>
+			<button
+				type="button"
+				aria-label={t("window.maximize")}
+				onClick={platform.window.maximize}
+				className="flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+			>
+				<WindowGlyph kind="maximize" />
+			</button>
+			<button
+				type="button"
+				aria-label={t("window.close")}
+				onClick={platform.window.close}
+				className="flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-red-600 hover:text-white"
+			>
+				<WindowGlyph kind="close" />
+			</button>
+		</div>
+	);
+}
+
+/** The hairline between two columns, and the grab zone either side of it. */
+function ResizeHandle({
+	onPointerDown,
+}: {
+	onPointerDown: (event: PointerEvent) => void;
+}) {
+	return (
+		<div
+			onPointerDown={onPointerDown}
+			className="relative z-10 w-px shrink-0 cursor-col-resize bg-border transition-colors after:absolute after:inset-y-0 after:-left-1 after:-right-1 hover:bg-ring"
+		/>
+	);
+}
+
+function PanelToggle({
+	icon: Icon,
+	label,
+	onClick,
+	className,
+}: {
+	icon: typeof PanelLeft;
+	label: string;
+	onClick: () => void;
+	className?: string;
+}) {
+	return (
+		<Button
+			size="icon"
+			variant="ghost"
+			aria-label={label}
+			title={label}
+			onClick={onClick}
+			className={cn(
+				"mx-1 my-1.5 size-6 shrink-0 text-muted-foreground",
+				className,
+			)}
+		>
+			<Icon className="size-3.5" />
+		</Button>
+	);
+}
+
 export function App() {
 	const { t } = useTranslation();
 	const updater = useUpdater();
 	const sessions = useSessions();
-	const [projectOpen, setProjectOpen] = useState(false);
-	const [sessionIn, setSessionIn] = useState<string | null>(null);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [theme, setTheme] = useState<Theme>("system");
+	const [workspaceOpen, setWorkspaceOpen] = useState(false);
+	const [dragging, setDragging] = useState(false);
+	// Which pty sits behind each terminal tab, so the panel can ask the OS
+	// where that shell is. The tab on screen decides what the panel shows.
+	const [ptys, setPtys] = useState<Record<string, number>>({});
+	const bindPty = useCallback(
+		(sessionId: string, id: number | null) =>
+			setPtys((previous) => {
+				if (id === null) {
+					const { [sessionId]: _gone, ...rest } = previous;
+					return rest;
+				}
+				return { ...previous, [sessionId]: id };
+			}),
+		[],
+	);
+	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const [panelOpen, setPanelOpen] = useState(true);
+	const [sidebarWidth, resizeSidebar] = useResizable(
+		"sidebar",
+		224,
+		160,
+		420,
+		1,
+	);
+	const [panelWidth, resizePanel] = useResizable("panel", 256, 200, 520, -1);
 
 	useEffect(() => {
 		const media = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
@@ -70,135 +181,216 @@ export function App() {
 	}, [theme]);
 
 	const active = sessions.activeSession;
+	const cwd = useTerminalCwd(active ? (ptys[active.id] ?? null) : null);
+	const repo = useRepo(cwd);
+
+	// Terminals are numbered within their workspace, the way a shell numbers
+	// its own windows, so a name is never asked for.
+	const terminalTitle = (projectId: string) =>
+		t("session.terminalTitle", {
+			n:
+				sessions.sessions.filter((session) => session.projectId === projectId)
+					.length + 1,
+		});
+
+	// The folder picker is the whole "new workspace" flow; the folder names
+	// itself and opens into a terminal. With no workspace yet, "+" is that too.
+	const newWorkspace = () => setWorkspaceOpen(true);
+
+	const versionLabel =
+		updater.state.status === "checking"
+			? t("update.footer.checking")
+			: updater.state.status === "upToDate"
+				? `v${__APP_VERSION__} · ${t("update.footer.upToDate")}`
+				: `v${__APP_VERSION__}`;
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-			{/* Drawn by us, dragged by the OS. On macOS the traffic lights sit at the
-			    left end and the app draws no controls; elsewhere it draws its own at
-			    the right end, so minimise and maximise can hover grey while close
-			    hovers red. */}
-			<div
-				className={`title-bar flex shrink-0 select-none items-center gap-2 border-b text-muted-foreground text-xs ${platform.isMac ? "pl-20" : "pl-4"}`}
-			>
-				<img src={icon} alt="" className="size-4" draggable={false} />
-				<span className="font-medium">asdf</span>
+			<div className="flex min-h-0 flex-1">
+				{/* Settings sits at the foot of the sidebar, out of the way of the work. */}
+				{sidebarOpen && (
+					<div
+						style={{ width: sidebarWidth }}
+						className="flex shrink-0 flex-col bg-muted/30"
+					>
+						{/* Top row of the window. On macOS the traffic lights sit in its
+						    left end, so the name starts past them. */}
+						<div
+							className={cn(
+								"drag-region flex h-9 shrink-0 items-center px-3",
+								platform.isMac && "pl-[88px]",
+							)}
+						>
+							<span className="font-medium text-xs">{t("app.title")}</span>
+						</div>
 
-				{!platform.isMac && (
-					<div className="ml-auto flex h-full">
-						<button
-							type="button"
-							aria-label={t("window.minimize")}
-							onClick={platform.window.minimize}
-							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
-						>
-							<WindowGlyph kind="minimize" />
-						</button>
-						<button
-							type="button"
-							aria-label={t("window.maximize")}
-							onClick={platform.window.maximize}
-							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
-						>
-							<WindowGlyph kind="maximize" />
-						</button>
-						<button
-							type="button"
-							aria-label={t("window.close")}
-							onClick={platform.window.close}
-							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-red-600 hover:text-white"
-						>
-							<WindowGlyph kind="close" />
-						</button>
+						<SessionSidebar
+							projects={sessions.projects}
+							sessions={sessions.sessions}
+							activeProjectId={sessions.activeProjectId}
+							onSelectProject={sessions.selectProject}
+							onNewWorkspace={newWorkspace}
+							onRemoveWorkspace={sessions.removeWorkspace}
+						/>
+
+						<div className="shrink-0 p-1.5">
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setSettingsOpen(true)}
+								className="h-7 w-full justify-start gap-2 px-2 text-muted-foreground text-xs"
+							>
+								<Settings className="size-3.5" />
+								{t("settings.title")}
+							</Button>
+						</div>
+					</div>
+				)}
+				{sidebarOpen && <ResizeHandle onPointerDown={resizeSidebar} />}
+
+				{/* One PaneArea per split. The panel toggles and caption buttons
+				    belong to the window, so only the outermost strips carry them. */}
+				<div className="flex min-w-0 flex-1">
+					{sessions.paneGroups.map((group, index) => (
+						<Fragment key={group.id}>
+							{index > 0 && <div className="w-px shrink-0 bg-border" />}
+							<PaneArea
+								panes={group.panes}
+								sessions={sessions.sessions}
+								repo={repo.snapshot}
+								issues={repo.issues}
+								pulls={repo.pulls}
+								reviewOf={repo.reviewOf}
+								onReview={(file, state) => void repo.review(file, state)}
+								activeId={group.activeId}
+								groupId={group.id}
+								focused={group.id === sessions.activeGroupId}
+								onFocusGroup={() => sessions.focusGroup(group.id)}
+								onFocus={sessions.focusPane}
+								onClose={sessions.closePane}
+								onNewSession={() => {
+									if (!sessions.activeProject) return newWorkspace();
+									sessions.focusGroup(group.id);
+									sessions.createTerminal(
+										sessions.activeProjectId,
+										terminalTitle(sessions.activeProjectId),
+									);
+								}}
+								dragging={dragging}
+								onDragStart={() => setDragging(true)}
+								onDragEnd={() => setDragging(false)}
+								onDrop={(paneId, target) => {
+									setDragging(false);
+									sessions.movePane(paneId, target);
+								}}
+								renderAgent={(session) => (
+									<TerminalPane
+										cwd={null}
+										onSession={(id) => bindPty(session.id, id)}
+									/>
+								)}
+								// With the sidebar closed the strip is the window's left edge,
+								// and on macOS the traffic lights sit there.
+								leading={
+									index === 0 && (
+										<div
+											className={cn(
+												"flex shrink-0",
+												!sidebarOpen &&
+													(platform.isMac ? "pl-[88px]" : "pl-1.5"),
+											)}
+										>
+											<PanelToggle
+												icon={PanelLeft}
+												label={t("window.toggleSidebar")}
+												onClick={() => setSidebarOpen((open) => !open)}
+											/>
+										</div>
+									)
+								}
+								trailing={
+									index === sessions.paneGroups.length - 1 && (
+										<>
+											<PanelToggle
+												icon={PanelRight}
+												label={t("window.togglePanel")}
+												onClick={() => setPanelOpen((open) => !open)}
+												// Closed, the strip is the window's right edge: keep the
+												// button off it, unless the caption buttons sit there anyway.
+												className={cn(!panelOpen && platform.isMac && "mr-2.5")}
+											/>
+											{!platform.isMac && <WindowControls />}
+										</>
+									)
+								}
+							/>
+						</Fragment>
+					))}
+				</div>
+
+				{panelOpen && <ResizeHandle onPointerDown={resizePanel} />}
+				{panelOpen && (
+					<div style={{ width: panelWidth }} className="flex shrink-0">
+						<SidePanel
+							cwd={cwd}
+							repo={repo.snapshot}
+							error={repo.error}
+							issues={repo.issues}
+							pulls={repo.pulls}
+							github={repo.github}
+							reviewOf={repo.reviewOf}
+							onRefreshGithub={() => void repo.refreshGithub()}
+							onCommit={repo.commit}
+							onOpenFile={(dir, path) =>
+								active && sessions.openFile(active.id, dir, path)
+							}
+							onOpenIssue={sessions.openIssue}
+							onOpenPull={sessions.openPull}
+						/>
 					</div>
 				)}
 			</div>
 
-			<div className="flex min-h-0 flex-1">
-				{/* Settings sits at the foot of the sidebar, out of the way of the work. */}
-				<div className="flex w-64 shrink-0 flex-col border-r bg-muted/30">
-					<SessionSidebar
-						tree={sessions.tree}
-						collapsed={sessions.collapsed}
-						onToggle={sessions.toggleNode}
-						activeProjectId={sessions.activeProjectId}
-						onSelectProject={sessions.selectProject}
-						onNewProject={() => setProjectOpen(true)}
-					/>
-
-					<div className="flex shrink-0 items-center gap-1 border-t p-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setSettingsOpen(true)}
-							className="h-8 gap-1.5 px-2 text-muted-foreground text-xs"
-						>
-							<Settings className="size-4" />
-							{t("settings.title")}
-						</Button>
-						<span className="ml-auto">
-							<UpdateChip
-								state={updater.state}
-								onOpen={() => updater.setOpen(true)}
-							/>
-						</span>
-					</div>
-				</div>
-
-				<PaneArea
-					panes={sessions.panes}
-					sessions={sessions.sessions}
-					project={sessions.activeProject}
-					projectSessions={sessions.projectSessions}
-					activeId={sessions.activeId}
-					onFocus={sessions.focusPane}
-					onClose={sessions.closePane}
-					onOpenSession={sessions.openSession}
-					onNewSession={() => setSessionIn(sessions.activeProjectId)}
-					renderAgent={() => <TerminalPane />}
-					onReview={sessions.review}
-				/>
-
-				<SidePanel
-					session={active}
-					project={sessions.activeProject}
-					projectSessions={sessions.projectSessions}
-					onOpenFile={sessions.openFile}
-					onOpenSession={sessions.openSession}
-					onOpenIssue={sessions.openIssue}
-					onOpenPull={sessions.openPull}
-				/>
-			</div>
-
-			<footer className="flex h-7 shrink-0 items-center gap-3 border-t bg-muted/30 px-3 text-[11px] text-muted-foreground">
+			<footer className="flex h-6 shrink-0 items-center gap-3 border-t bg-muted/30 px-3 text-[10px] text-muted-foreground">
 				{active && (
 					<>
-						<span className="truncate font-mono">{active.branch}</span>
 						<span className="truncate">{sessions.activeProject?.name}</span>
-						<span className="truncate">{active.agent}</span>
-						<span className="tabular-nums">
-							{t("session.changed", { n: active.files.length })}
-						</span>
+						{repo.snapshot?.branch && (
+							<span className="truncate font-mono">{repo.snapshot.branch}</span>
+						)}
+						{repo.snapshot?.root && (
+							<span className="tabular-nums">
+								{t("session.changed", { n: repo.snapshot.changes.length })}
+							</span>
+						)}
 					</>
 				)}
 				<span className="ml-auto tabular-nums">
 					{t("session.pane.open", { n: sessions.panes.length })}
 				</span>
+				<UpdateChip
+					state={updater.state}
+					onOpen={() => updater.setOpen(true)}
+				/>
+				{/* The version doubles as the manual update check: pressing it is
+				    the question "is there a newer one?" */}
+				<button
+					type="button"
+					title={t("update.footer.check")}
+					onClick={() => void updater.runCheck(true)}
+					disabled={updater.state.status === "checking"}
+					className="tabular-nums transition-colors hover:text-foreground disabled:hover:text-muted-foreground"
+				>
+					{versionLabel}
+				</button>
 			</footer>
 
-			<NewProjectDialog
-				open={projectOpen}
-				onOpenChange={setProjectOpen}
-				groups={sessions.groups}
-				onCreate={sessions.createProject}
-			/>
-
-			<NewSessionDialog
-				projectId={sessionIn}
-				projectName={
-					sessions.projects.find((project) => project.id === sessionIn)?.name
+			<NewWorkspaceDialog
+				open={workspaceOpen}
+				onOpenChange={setWorkspaceOpen}
+				onCreate={(name) =>
+					sessions.createWorkspace(name, t("session.terminalTitle", { n: 1 }))
 				}
-				onOpenChange={(next) => !next && setSessionIn(null)}
-				onCreate={sessions.createSession}
 			/>
 
 			<SettingsDialog

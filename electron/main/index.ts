@@ -1,11 +1,19 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
+import {
+	app,
+	BrowserWindow,
+	ipcMain,
+	Menu,
+	nativeTheme,
+	shell,
+} from "electron";
 import {
 	TERMINAL_EXIT_EVENT,
 	TERMINAL_OUTPUT_EVENT,
 	WINDOW_CLOSE_REQUESTED_EVENT,
 } from "@/ipc/bindings";
+import * as repo from "./repo";
 import { ok } from "./result";
 import { Registry } from "./terminal";
 import { createUpdater } from "./updater";
@@ -24,19 +32,27 @@ let main: BrowserWindow | null = null;
 /** Set once the renderer has agreed the window may go. */
 let closing = false;
 
+// What Chromium paints where the renderer has not yet: the strip a resize
+// exposes, the frame before first paint. Left at the default it is white, which
+// flashes in a dark window. Mirrors --background in src/index.css.
+const background = () =>
+	nativeTheme.shouldUseDarkColors ? "#242424" : "#ffffff";
+
 function createWindow(): BrowserWindow {
 	const window = new BrowserWindow({
 		title: "asdf",
+		backgroundColor: background(),
 		width: 1280,
 		height: 800,
 		minWidth: 900,
 		minHeight: 600,
 		show: false,
-		// The renderer draws the title bar and its controls, so their hover states
-		// can differ — the OS overlay only lets close turn red. macOS keeps its
-		// traffic lights, placed to sit inside the strip the renderer draws.
+		// No title bar: the renderer's top row reaches the window edge and draws
+		// its own caption buttons, so their hover states can differ — the OS
+		// overlay only lets close turn red. macOS keeps its traffic lights, centred
+		// in the 36px top row every column shares.
 		titleBarStyle: "hidden",
-		trafficLightPosition: { x: 12, y: 10 },
+		trafficLightPosition: { x: 12, y: 12 },
 		webPreferences: {
 			preload: path.join(directory, "../preload/index.mjs"),
 			sandbox: false,
@@ -46,6 +62,7 @@ function createWindow(): BrowserWindow {
 	// Showing only once the first frame is painted avoids the white flash a
 	// freshly created BrowserWindow shows while the renderer boots.
 	window.once("ready-to-show", () => window.show());
+	nativeTheme.on("updated", () => window.setBackgroundColor(background()));
 
 	// Links to the outside world belong in the user's browser, not in a webview
 	// with no address bar.
@@ -81,6 +98,42 @@ const updater = createUpdater(() => main);
 
 ipcMain.handle("open_workspace", (_event, { path: raw }: { path: string }) =>
 	openWorkspace(raw),
+);
+
+// The side panel follows the shell: where it is now, and what git and gh say
+// about that place.
+ipcMain.handle("terminal://cwd", async (_event, { id }: { id: number }) => {
+	const pid = terminals.pid(id);
+	return ok(pid === null ? null : await repo.cwdOf(pid));
+});
+ipcMain.handle("repo://snapshot", (_event, { cwd }: { cwd: string }) =>
+	repo.snapshot(cwd),
+);
+ipcMain.handle(
+	"repo://diff",
+	(_event, { root, file }: { root: string; file: string }) =>
+		repo.diff(root, file),
+);
+ipcMain.handle(
+	"repo://read",
+	(_event, { dir, file }: { dir: string; file: string }) =>
+		repo.read(dir, file),
+);
+ipcMain.handle(
+	"repo://revert",
+	(_event, { root, file }: { root: string; file: string }) =>
+		repo.revert(root, file),
+);
+ipcMain.handle(
+	"repo://commit",
+	(_event, { root, message }: { root: string; message: string }) =>
+		repo.commit(root, message),
+);
+ipcMain.handle("repo://issues", (_event, { cwd }: { cwd: string }) =>
+	repo.issues(cwd),
+);
+ipcMain.handle("repo://pulls", (_event, { cwd }: { cwd: string }) =>
+	repo.pulls(cwd),
 );
 
 ipcMain.handle(

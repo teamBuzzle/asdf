@@ -98,6 +98,11 @@ export class Registry {
 		}
 	}
 
+	/** The shell's process id, for asking the OS where it is. */
+	pid(id: number): number | null {
+		return this.sessions.get(id)?.pid ?? null;
+	}
+
 	close(id: number): IpcResult<null> {
 		const pty = this.sessions.get(id);
 		if (pty) {

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -28,6 +29,12 @@ export default defineConfig({
 		root: ".",
 		plugins: [react(), tailwindcss()],
 		resolve: { alias },
+		// release-please bumps package.json; the footer shows what it says.
+		define: {
+			__APP_VERSION__: JSON.stringify(
+				JSON.parse(readFileSync("package.json", "utf8")).version,
+			),
+		},
 		build: {
 			rollupOptions: { input: path.resolve(__dirname, "index.html") },
 		},

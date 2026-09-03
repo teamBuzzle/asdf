@@ -24,6 +24,8 @@ export type SessionStatus =
  */
 export function useTerminalSession(
 	host: React.RefObject<HTMLDivElement | null>,
+	/** Where the shell starts. Null falls back to the user's home. */
+	cwd: string | null,
 ) {
 	const [session, setSession] = useState<SessionStatus>({ status: "starting" });
 	const terminal = useRef<Terminal | null>(null);
@@ -53,7 +55,7 @@ export function useTerminalSession(
 		terminal.current = term;
 
 		void (async () => {
-			const opened = await ipc.openTerminal(null, term.cols, term.rows);
+			const opened = await ipc.openTerminal(cwd, term.cols, term.rows);
 			if (disposed) return;
 			if (!opened.ok) {
 				setSession({ status: "failed", reason: opened.error.message });
@@ -106,7 +108,7 @@ export function useTerminalSession(
 			terminal.current?.dispose();
 			terminal.current = null;
 		};
-	}, [host]);
+	}, [host, cwd]);
 
 	return { session };
 }

@@ -1,50 +1,36 @@
 import {
 	Check,
-	Circle,
 	CircleDot,
-	FileCode2,
 	GitBranch,
 	GitPullRequest,
 	type LucideIcon,
-	Pause,
-	Play,
 	Plus,
-	TerminalSquare,
 	Undo2,
 	X,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type DragEvent, type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { ipc } from "@/ipc/client";
 import { cn } from "@/lib/utils";
+import type { DropTarget } from "../panes";
 import type {
+	DiffRow,
+	Issue,
 	Pane,
-	Project,
+	PullRequest,
+	RepoSnapshot,
 	ReviewState,
 	Session,
-	SessionStatus,
 } from "../types";
 import { DiffView, SourceView } from "./CodeView";
 
-const statusIcon: Record<SessionStatus, LucideIcon> = {
-	waiting: Pause,
-	failed: X,
-	done: Check,
-	running: Play,
-	idle: Circle,
-};
+/** The dataTransfer type a dragged tab travels as. */
+const PANE_MIME = "application/x-asdf-pane";
 
-const statusTone: Record<SessionStatus, string> = {
-	waiting: "text-amber-600 dark:text-amber-500",
-	failed: "text-destructive",
-	done: "text-emerald-600 dark:text-emerald-500",
-	running: "text-sky-600 dark:text-sky-500",
-	idle: "text-muted-foreground/60",
-};
-
-const tabIcon: Record<Pane["kind"], LucideIcon> = {
-	session: TerminalSquare,
-	file: FileCode2,
+// Only the tabs whose label is a bare number need saying what they are; a
+// terminal's or a file's name already does.
+const tabIcon: Partial<Record<Pane["kind"], LucideIcon>> = {
 	issue: CircleDot,
 	pull: GitPullRequest,
 };
@@ -63,31 +49,57 @@ function tabLabel(pane: Pane, sessions: Session[]): string {
 type Props = {
 	panes: Pane[];
 	sessions: Session[];
-	project?: Project;
-	/** Sessions of the project whose window is open, for the empty state. */
-	projectSessions: Session[];
+	/** What the panel knows about the folder on screen, for file and GitHub
+	 *  tabs; they were opened from it. */
+	repo: RepoSnapshot | null;
+	issues: Issue[];
+	pulls: PullRequest[];
+	reviewOf: (file: string) => ReviewState;
+	onReview: (file: string, state: ReviewState) => void;
 	activeId: string;
+	/** Which group this is, and whether it is the one new tabs open in. */
+	groupId: string;
+	focused: boolean;
+	onFocusGroup: () => void;
 	onFocus: (id: string) => void;
 	onClose: (id: string) => void;
-	onOpenSession: (sessionId: string) => void;
 	onNewSession: () => void;
+	/** A tab is being dragged somewhere in the window, so show where it can
+	 *  land. */
+	dragging: boolean;
+	onDragStart: () => void;
+	onDragEnd: () => void;
+	onDrop: (paneId: string, target: DropTarget) => void;
+	/** The shell's buttons at either end of the strip: panel toggles, and the
+	 *  window's caption buttons where the OS does not draw its own. */
+	leading?: ReactNode;
+	trailing?: ReactNode;
 	/** Owned by the terminal work. Rendered for the open session tab. */
 	renderAgent: (session: Session) => ReactNode;
-	onReview: (sessionId: string, path: string, state: ReviewState) => void;
 };
 
 export function PaneArea({
 	panes,
 	sessions,
-	project,
-	projectSessions,
+	repo,
+	issues,
+	pulls,
+	reviewOf,
+	onReview,
 	activeId,
+	groupId,
+	focused,
+	onFocusGroup,
 	onFocus,
 	onClose,
-	onOpenSession,
 	onNewSession,
+	dragging,
+	onDragStart,
+	onDragEnd,
+	onDrop,
+	leading,
+	trailing,
 	renderAgent,
-	onReview,
 }: Props) {
 	const { t } = useTranslation();
 	const active = panes.find((pane) => pane.id === activeId) ?? panes[0];
@@ -96,21 +108,64 @@ export function PaneArea({
 			? active.sessionId
 			: undefined;
 	const session = sessions.find((item) => item.id === sessionId);
+	const [over, setOver] = useState<"left" | "right" | null>(null);
+
+	const accept = (event: DragEvent) => {
+		if (!dragging) return;
+		event.preventDefault();
+		event.dataTransfer.dropEffect = "move";
+	};
+	const dropped = (event: DragEvent, target: DropTarget) => {
+		event.preventDefault();
+		setOver(null);
+		const id = event.dataTransfer.getData(PANE_MIME);
+		if (id) onDrop(id, target);
+	};
+
+	// Nothing open: the one thing to do is start a terminal.
+	const empty = (
+		<div className="flex flex-1 items-center justify-center">
+			<Button
+				variant="ghost"
+				size="sm"
+				onClick={onNewSession}
+				className="h-7 gap-1.5 text-muted-foreground text-xs"
+			>
+				<Plus className="size-3.5" />
+				{t("session.newSession")}
+			</Button>
+		</div>
+	);
 
 	return (
-		<div className="flex min-w-0 flex-1 flex-col">
+		<div
+			onPointerDownCapture={onFocusGroup}
+			className="flex min-w-0 flex-1 flex-col"
+		>
 			{/* One strip of tabs, browser-style: a tab is a session, a file, an issue
 			    or a pull request, and the + at the end starts another. It stays on
-			    screen with no tabs so the + is always reachable. */}
-			<div className="flex shrink-0 items-end gap-px overflow-x-auto border-b bg-muted/40 px-1 pt-1">
+			    screen with no tabs so the + is always reachable. Tabs share the
+			    strip the way a browser's do: equal widths up to a cap, shrinking
+			    together as more open, never scrolling. Dropping a tab on the strip
+			    moves it into this group. */}
+			<div
+				role="tablist"
+				onDragOver={accept}
+				onDrop={(event) => dropped(event, { group: groupId })}
+				className="drag-region flex h-9 shrink-0 items-stretch overflow-hidden border-b bg-muted/40"
+			>
+				{leading}
 				{panes.map((pane) => (
 					<Tab
 						key={pane.id}
 						pane={pane}
 						label={tabLabel(pane, sessions)}
 						active={pane.id === active?.id}
+						focused={focused}
 						onFocus={() => onFocus(pane.id)}
 						onClose={() => onClose(pane.id)}
+						onDragStart={onDragStart}
+						onDragEnd={onDragEnd}
 					/>
 				))}
 
@@ -119,74 +174,63 @@ export function PaneArea({
 					variant="ghost"
 					aria-label={t("session.newSession")}
 					onClick={onNewSession}
-					className="mb-1 ml-1 size-6 shrink-0"
+					className="my-1.5 ml-1 size-6 shrink-0"
 				>
 					<Plus className="size-3.5" />
 				</Button>
+				{trailing && <div className="ml-auto flex shrink-0">{trailing}</div>}
 			</div>
 
-			{!active ? (
-				<NewTabPage sessions={projectSessions} onOpenSession={onOpenSession} />
-			) : active.kind === "issue" ? (
-				<IssueBody project={project} number={active.number} />
-			) : active.kind === "pull" ? (
-				<PullBody project={project} number={active.number} />
-			) : !session ? (
-				<NewTabPage sessions={projectSessions} onOpenSession={onOpenSession} />
-			) : active.kind === "session" ? (
-				<SessionBody session={session}>{renderAgent(session)}</SessionBody>
-			) : (
-				<FileBody session={session} path={active.path} onReview={onReview} />
-			)}
-		</div>
-	);
-}
+			<div className="relative flex min-h-0 flex-1 flex-col">
+				{!active ? (
+					empty
+				) : active.kind === "issue" ? (
+					<IssueBody
+						issue={issues.find((item) => item.number === active.number)}
+					/>
+				) : active.kind === "pull" ? (
+					<PullBody
+						pull={pulls.find((item) => item.number === active.number)}
+					/>
+				) : !session ? (
+					empty
+				) : active.kind === "session" ? (
+					<SessionBody>{renderAgent(session)}</SessionBody>
+				) : (
+					<FileBody
+						key={active.id}
+						dir={active.dir}
+						path={active.path}
+						repo={repo}
+						reviewOf={reviewOf}
+						onReview={onReview}
+					/>
+				)}
 
-// A window with no tabs shows what it could open, the way a browser's new tab
-// page does. Without it a project's sessions would have nowhere to be reached.
-function NewTabPage({
-	sessions,
-	onOpenSession,
-}: {
-	sessions: Session[];
-	onOpenSession: (sessionId: string) => void;
-}) {
-	const { t } = useTranslation();
-
-	return (
-		<div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-3 p-8">
-			<p className="text-muted-foreground text-sm">{t("session.pane.empty")}</p>
-			<ul className="flex w-full max-w-md flex-col gap-1">
-				{sessions.map((session) => {
-					const Icon = statusIcon[session.status];
-					return (
-						<li key={session.id}>
+				{/* While a tab is in the air, the body splits into two landing zones:
+			    dropping on a side opens a new group on that side. */}
+				{dragging && (
+					<div className="absolute inset-0 z-10 flex">
+						{(["left", "right"] as const).map((side) => (
+							// A landing zone, not a control: nothing to focus or press.
 							<button
+								key={side}
 								type="button"
-								onClick={() => onOpenSession(session.id)}
-								className="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left hover:bg-accent/60"
-							>
-								<Icon
-									aria-label={t(`session.status.${session.status}`)}
-									className={cn(
-										"size-3.5 shrink-0",
-										statusTone[session.status],
-									)}
-								/>
-								<span className="min-w-0 flex-1">
-									<span className="block truncate text-sm">
-										{session.title}
-									</span>
-									<span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-										<GitBranch className="size-3 shrink-0" />
-										<span className="truncate font-mono">{session.branch}</span>
-									</span>
-								</span>
-							</button>
-						</li>
-					);
-				})}
-			</ul>
+								tabIndex={-1}
+								aria-hidden="true"
+								onDragOver={accept}
+								onDragEnter={() => setOver(side)}
+								onDragLeave={() => setOver(null)}
+								onDrop={(event) => dropped(event, { split: groupId, side })}
+								className={cn(
+									"flex-1 transition-colors",
+									over === side && "bg-ring/20",
+								)}
+							/>
+						))}
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }
@@ -195,41 +239,69 @@ function Tab({
 	pane,
 	label,
 	active,
+	focused,
 	onFocus,
 	onClose,
+	onDragStart,
+	onDragEnd,
 }: {
 	pane: Pane;
 	label: string;
 	active: boolean;
+	focused: boolean;
 	onFocus: () => void;
 	onClose: () => void;
+	onDragStart: () => void;
+	onDragEnd: () => void;
 }) {
 	const { t } = useTranslation();
 	const Icon = tabIcon[pane.kind];
 
 	return (
+		// The active tab is the page's top edge: same fill, and a hairline of
+		// it laid over the strip's border so the two read as one surface. A
+		// container so the close button can hide once the tab is squeezed.
 		<span
+			role="tab"
+			aria-selected={active}
+			tabIndex={active ? 0 : -1}
+			draggable
+			onDragStart={(event) => {
+				event.dataTransfer.setData(PANE_MIME, pane.id);
+				event.dataTransfer.effectAllowed = "move";
+				onDragStart();
+			}}
+			onDragEnd={onDragEnd}
 			className={cn(
-				"flex max-w-52 shrink-0 items-center gap-1.5 rounded-t-lg border border-b-0 px-2.5 py-1.5",
+				"@container relative flex min-w-8 flex-1 basis-0 items-center gap-1 border-r pr-1 pl-2.5 max-w-52",
 				active
-					? "border-border bg-background"
-					: "border-transparent text-muted-foreground hover:bg-background/50",
+					? "bg-background after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-background"
+					: "text-muted-foreground hover:bg-background/50 hover:text-foreground",
+				// The showing tab of a group that is not the focused one steps back,
+				// so the group the next tab opens in is the one that reads bold.
+				active && !focused && "text-muted-foreground",
 			)}
 		>
 			<button
 				type="button"
 				onClick={onFocus}
-				className="flex min-w-0 items-center gap-1.5 text-xs"
+				className="flex min-w-0 flex-1 items-center gap-1.5 text-[11px]"
 			>
-				<Icon className="size-3.5 shrink-0" />
+				{Icon && <Icon className="size-3.5 shrink-0" />}
 				<span className="truncate">{label}</span>
 			</button>
+			{/* Squeezed inactive tabs give the space to their name; the active
+			    tab keeps its close button, as the one you are most likely to
+			    close. */}
 			<Button
 				size="icon"
 				variant="ghost"
 				aria-label={t("session.pane.close")}
 				onClick={onClose}
-				className="-mr-1 size-5 shrink-0"
+				className={cn(
+					"-mr-1 size-5 shrink-0",
+					!active && "hidden @[5rem]:flex",
+				)}
 			>
 				<X className="size-3" />
 			</Button>
@@ -237,60 +309,82 @@ function Tab({
 	);
 }
 
-function SessionBody({
-	session,
-	children,
-}: {
-	session: Session;
-	children: ReactNode;
-}) {
-	const { t } = useTranslation();
+function SessionBody({ children }: { children: ReactNode }) {
+	// No toolbar: the tab names the session and the status bar carries the
+	// branch, so a third row would only repeat them. A one-cell grid, not a
+	// block: the terminal positions its children absolutely and needs the
+	// slot to give it a height.
+	return <div className="grid min-h-0 flex-1 overflow-hidden">{children}</div>;
+}
 
-	return (
-		<>
-			{/* No toolbar: the tab names the session and the status bar carries the
-			    branch, so a third row would only repeat them. A one-cell grid, not a
-			    block: the terminal positions its children absolutely and needs the
-			    slot to give it a height. */}
-			<div className="grid min-h-0 flex-1 overflow-hidden">{children}</div>
-
-			{session.blockedOn && session.status === "waiting" && (
-				<div className="flex shrink-0 items-center gap-2 border-amber-500/30 border-t bg-amber-500/10 px-3 py-1.5">
-					<span className="min-w-0 flex-1 truncate font-mono text-[11px]">
-						{session.blockedOn}
-					</span>
-					<Button size="sm" variant="secondary" className="h-6 text-[11px]">
-						{t("session.approve.allow")}
-					</Button>
-					<Button size="sm" variant="ghost" className="h-6 text-[11px]">
-						{t("session.approve.deny")}
-					</Button>
-				</div>
-			)}
-		</>
-	);
+/** Repository-relative name of a file opened from `dir`, or null when the
+ *  file is outside the repository (or there is none). */
+function inRepo(root: string | null, dir: string, path: string): string | null {
+	if (!root) return null;
+	const full = `${dir}/${path}`;
+	return full.startsWith(`${root}/`) ? full.slice(root.length + 1) : null;
 }
 
 function FileBody({
-	session,
+	dir,
 	path,
+	repo,
+	reviewOf,
 	onReview,
 }: {
-	session: Session;
+	dir: string;
 	path: string;
-	onReview: (sessionId: string, path: string, state: ReviewState) => void;
+	repo: RepoSnapshot | null;
+	reviewOf: (file: string) => ReviewState;
+	onReview: (file: string, state: ReviewState) => void;
 }) {
 	const { t } = useTranslation();
-	const changed = session.files.find((file) => file.path === path);
-	// A file that was only added has no "before" worth showing, so it opens as
-	// itself. Its content is the after side of its own diff.
-	const source =
-		session.sources[path] ??
-		changed?.rows.flatMap((row) => (row.after ? [row.after.text] : []));
+	const [rows, setRows] = useState<DiffRow[] | null>(null);
+	const [source, setSource] = useState<string[] | null>(null);
+	const [failure, setFailure] = useState<string | null>(null);
+
+	const root = repo?.root ?? null;
+	const file = inRepo(root, dir, path);
+	const changed = file
+		? repo?.changes.find((item) => item.path === file)
+		: undefined;
+	const asDiff = !!changed && changed.kind !== "deleted";
+	// A change is read as a diff; anything else as itself. One string names
+	// the read, so a new snapshot with the same numbers re-reads nothing.
+	const request = JSON.stringify(
+		asDiff && root && file
+			? { diff: [root, file], at: [changed.added, changed.removed] }
+			: { read: [dir, path] },
+	);
+
+	useEffect(() => {
+		let alive = true;
+		setFailure(null);
+		const wanted = JSON.parse(request) as {
+			diff?: [string, string];
+			read?: [string, string];
+		};
+		void (async () => {
+			if (wanted.diff) {
+				const result = await ipc.repoDiff(...wanted.diff);
+				if (!alive) return;
+				if (result.ok) setRows(result.value);
+				else setFailure(result.error.message);
+			} else if (wanted.read) {
+				const result = await ipc.repoRead(...wanted.read);
+				if (!alive) return;
+				if (result.ok) setSource(result.value);
+				else setFailure(result.error.message);
+			}
+		})();
+		return () => {
+			alive = false;
+		};
+	}, [request]);
 
 	return (
 		<>
-			{changed?.kind === "modified" && (
+			{changed && file && (
 				<div className="flex shrink-0 items-center gap-2 border-b px-3 py-1.5">
 					<span className="shrink-0 text-[11px] tabular-nums">
 						<span className="text-emerald-600">+{changed.added}</span>{" "}
@@ -301,17 +395,19 @@ function FileBody({
 							size="sm"
 							variant="ghost"
 							className="h-7 gap-1 text-xs"
-							onClick={() => onReview(session.id, path, "reviewed")}
+							disabled={reviewOf(file) === "reviewed"}
+							onClick={() => onReview(file, "reviewed")}
 						>
 							<Check className="size-3.5" />
 							{t("session.changes.approve")}
 						</Button>
-						{/* Reverting is meant to feed the agent, not merely undo. */}
+						{/* Reverting puts the file back as git last saw it. */}
 						<Button
 							size="sm"
 							variant="ghost"
 							className="h-7 gap-1 text-xs"
-							onClick={() => onReview(session.id, path, "reverted")}
+							disabled={changed.kind === "added"}
+							onClick={() => onReview(file, "reverted")}
 						>
 							<Undo2 className="size-3.5" />
 							{t("session.changes.revert")}
@@ -321,14 +417,12 @@ function FileBody({
 			)}
 
 			<div className="min-h-0 flex-1 overflow-auto">
-				{changed?.kind === "modified" ? (
-					<DiffView rows={changed.rows} />
-				) : source ? (
-					<SourceView lines={source} />
+				{failure ? (
+					<p className="p-6 text-muted-foreground text-sm">{failure}</p>
+				) : asDiff ? (
+					rows && <DiffView rows={rows} />
 				) : (
-					<p className="p-6 text-muted-foreground text-sm">
-						{t("session.files.noPreview")}
-					</p>
+					source && <SourceView lines={source} />
 				)}
 			</div>
 		</>
@@ -337,9 +431,8 @@ function FileBody({
 
 // An issue or a pull request is a page you open and read, which is why it lands
 // in a tab rather than in the narrow column that lists it.
-function IssueBody({ project, number }: { project?: Project; number: number }) {
+function IssueBody({ issue }: { issue?: Issue }) {
 	const { t } = useTranslation();
-	const issue = project?.issues.find((item) => item.number === number);
 	if (!issue) return <Missing />;
 
 	return (
@@ -360,9 +453,8 @@ function IssueBody({ project, number }: { project?: Project; number: number }) {
 	);
 }
 
-function PullBody({ project, number }: { project?: Project; number: number }) {
+function PullBody({ pull }: { pull?: PullRequest }) {
 	const { t } = useTranslation();
-	const pull = project?.pulls.find((item) => item.number === number);
 	if (!pull) return <Missing />;
 
 	return (
