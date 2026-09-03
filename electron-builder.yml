@@ -10,6 +10,11 @@ files:
   - out/**
   - package.json
 
+# node-pty ships N-API prebuilds, which are ABI-stable and load under Electron
+# as they are. Rebuilding them from source would need Python and a compiler on
+# every machine that packages the app, to produce the binary already in the box.
+npmRebuild: false
+
 # node-pty ships a native addon and, on Windows, conpty.dll plus OpenConsole.exe
 # next to it. Unpacked so the loader can find them inside the installed app.
 asarUnpack:
