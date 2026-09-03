@@ -24,6 +24,10 @@ publish:
   provider: github
   owner: teamBuzzle
   repo: asdf
+  # release-please has already published the release for this tag. Without
+  # this, electron-builder defaults to "draft", refuses the existing release
+  # ("existing type not compatible with publishing type") and uploads nothing.
+  releaseType: release
 
 mac:
   category: public.app-category.developer-tools
