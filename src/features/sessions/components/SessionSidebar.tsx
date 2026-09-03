@@ -69,12 +69,18 @@ export function SessionSidebar({
 					);
 					const open = !folded.has(project.id);
 					const active = project.id === activeProjectId;
+					// When one of its terminals is on screen, that row is the selected
+					// thing; the workspace only stands out while folded or empty.
+					const showing =
+						active && own.some((session) => session.id === activeSessionId);
 					return (
 						<li key={project.id}>
 							<div
 								className={cn(
 									"group flex items-center rounded-md",
-									active ? "bg-accent" : "hover:bg-accent/60",
+									active && (!open || !showing)
+										? "bg-accent"
+										: "hover:bg-accent/60",
 								)}
 							>
 								<button
@@ -130,7 +136,7 @@ export function SessionSidebar({
 													className={cn(
 														"flex w-full items-center gap-1.5 rounded-md py-1 pr-2 pl-7 text-left text-xs",
 														current
-															? "text-foreground"
+															? "bg-accent text-foreground"
 															: "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
 													)}
 												>
