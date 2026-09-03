@@ -273,7 +273,7 @@ function Tab({
 			}}
 			onDragEnd={onDragEnd}
 			className={cn(
-				"@container relative flex min-w-8 flex-1 basis-0 items-center gap-1 border-r pr-1 pl-2.5 max-w-52",
+				"@container relative flex min-w-8 max-w-52 flex-1 basis-0 items-center gap-1 border-r pr-2 pl-2.5",
 				active
 					? "bg-background after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-background"
 					: "text-muted-foreground hover:bg-background/50 hover:text-foreground",
@@ -298,10 +298,7 @@ function Tab({
 				variant="ghost"
 				aria-label={t("session.pane.close")}
 				onClick={onClose}
-				className={cn(
-					"-mr-1 size-5 shrink-0",
-					!active && "hidden @[5rem]:flex",
-				)}
+				className={cn("size-5 shrink-0", !active && "hidden @[5rem]:flex")}
 			>
 				<X className="size-3" />
 			</Button>
