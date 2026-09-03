@@ -65,7 +65,10 @@ describe("snapshot", () => {
 		const result = await snapshot(path.join(repoRoot, "electron"));
 		if (!result.ok) throw new Error(result.error.message);
 		expect(result.value.root).toBe(repoRoot);
-		expect(result.value.branch).toMatch(/\S/);
+		// CI checks pull requests out detached, where the branch is rightly null.
+		expect(result.value.branch === null || result.value.branch.length > 0).toBe(
+			true,
+		);
 		expect(result.value.tree.some((node) => node.name === "main")).toBe(true);
 	});
 

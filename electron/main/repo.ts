@@ -253,8 +253,10 @@ export async function snapshot(cwd: string): Promise<IpcResult<RepoSnapshot>> {
 		if (!(await stat(cwd).catch(() => null))?.isDirectory())
 			return fail({ kind: "notADirectory", message: cwd });
 
+		// git prints forward slashes everywhere; the rest of the process, and
+		// the paths the renderer sends back, are in the OS's own form.
 		const root = await git(cwd, "rev-parse", "--show-toplevel")
-			.then((out) => out.trim())
+			.then((out) => path.resolve(out.trim()))
 			.catch(() => null);
 
 		if (!root) {
