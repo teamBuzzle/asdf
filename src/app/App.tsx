@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import icon from "@/assets/asdf-icon.svg";
 import { Button } from "@/components/ui/button";
 
 import { NewSessionDialog } from "@/features/sessions/components/NewSessionDialog";
@@ -12,8 +13,40 @@ import { TerminalPane } from "@/features/terminal/components/TerminalPane";
 import { UpdateChip } from "@/features/updater/components/UpdateChip";
 import { UpdateDialog } from "@/features/updater/components/UpdateDialog";
 import { useUpdater } from "@/features/updater/use-updater";
+import { platform } from "@/ipc/platform";
 import { NewProjectDialog } from "./NewProjectDialog";
 import { SettingsDialog, type Theme } from "./SettingsDialog";
+
+/**
+ * The caption glyphs, drawn the way Windows draws its own: ten pixels, one
+ * pixel of stroke, and the straight ones snapped to the pixel grid. An icon
+ * font scaled down to this size lands on half pixels and blurs.
+ */
+const GLYPH = {
+	minimize: (
+		<path d="M0.5 5.5h9" stroke="currentColor" shapeRendering="crispEdges" />
+	),
+	maximize: (
+		<rect
+			x="0.5"
+			y="0.5"
+			width="9"
+			height="9"
+			fill="none"
+			stroke="currentColor"
+			shapeRendering="crispEdges"
+		/>
+	),
+	close: <path d="M0.5 0.5l9 9M9.5 0.5l-9 9" stroke="currentColor" />,
+} as const;
+
+function WindowGlyph({ kind }: { kind: keyof typeof GLYPH }) {
+	return (
+		<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+			{GLYPH[kind]}
+		</svg>
+	);
+}
 
 export function App() {
 	const { t } = useTranslation();
@@ -25,21 +58,63 @@ export function App() {
 	const [theme, setTheme] = useState<Theme>("system");
 
 	useEffect(() => {
-		const root = document.documentElement;
-		const dark =
-			theme === "dark" ||
-			(theme === "system" &&
-				globalThis.matchMedia?.("(prefers-color-scheme: dark)").matches);
-		root.classList.toggle("dark", Boolean(dark));
+		const media = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+		const apply = () => {
+			const dark = theme === "dark" || (theme === "system" && !!media?.matches);
+			document.documentElement.classList.toggle("dark", dark);
+		};
+		apply();
+		// "System" has to keep following the OS after mount, not just read it once.
+		media?.addEventListener("change", apply);
+		return () => media?.removeEventListener("change", apply);
 	}, [theme]);
 
 	const active = sessions.activeSession;
 
 	return (
 		<div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+			{/* Drawn by us, dragged by the OS. On macOS the traffic lights sit at the
+			    left end and the app draws no controls; elsewhere it draws its own at
+			    the right end, so minimise and maximise can hover grey while close
+			    hovers red. */}
+			<div
+				className={`title-bar flex shrink-0 select-none items-center gap-2 border-b text-muted-foreground text-xs ${platform.isMac ? "pl-20" : "pl-4"}`}
+			>
+				<img src={icon} alt="" className="size-4" draggable={false} />
+				<span className="font-medium">asdf</span>
+
+				{!platform.isMac && (
+					<div className="ml-auto flex h-full">
+						<button
+							type="button"
+							aria-label={t("window.minimize")}
+							onClick={platform.window.minimize}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
+						>
+							<WindowGlyph kind="minimize" />
+						</button>
+						<button
+							type="button"
+							aria-label={t("window.maximize")}
+							onClick={platform.window.maximize}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-muted hover:text-foreground"
+						>
+							<WindowGlyph kind="maximize" />
+						</button>
+						<button
+							type="button"
+							aria-label={t("window.close")}
+							onClick={platform.window.close}
+							className="flex h-full w-11 items-center justify-center transition-colors hover:bg-red-600 hover:text-white"
+						>
+							<WindowGlyph kind="close" />
+						</button>
+					</div>
+				)}
+			</div>
+
 			<div className="flex min-h-0 flex-1">
-				{/* No title bar: the window already has one. Settings sits at the foot
-				    of the sidebar, out of the way of the work. */}
+				{/* Settings sits at the foot of the sidebar, out of the way of the work. */}
 				<div className="flex w-64 shrink-0 flex-col border-r bg-muted/30">
 					<SessionSidebar
 						tree={sessions.tree}

@@ -9,9 +9,9 @@ each in its own git worktree, each with its own terminal and diff.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](#getting-started)
-[![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB.svg)](https://tauri.app)
+[![Electron](https://img.shields.io/badge/Electron-44-47848F.svg)](https://electronjs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev)
-[![Rust](https://img.shields.io/badge/Rust-stable-CE422B.svg)](https://www.rust-lang.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6.svg)](https://www.typescriptlang.org)
 [![Status](https://img.shields.io/badge/status-early%20development-orange.svg)](#status)
 
 </div>
@@ -48,8 +48,8 @@ asdf is built around the second column.
 - **Terminal and diff together.** Watch an agent work, then review the diff it
   produced without switching windows.
 - **Reviewable output.** Diffs annotated with what the agent was asked to do.
-- **Native, not a browser tab.** Tauri gives a small binary with real
-  filesystem and process access.
+- **Native, not a browser tab.** A desktop process with real filesystem and
+  process access, not a page in someone else's browser.
 
 ### Agents
 
@@ -63,7 +63,7 @@ The intent is that any CLI agent works, because they are just processes:
 
 | Layer | Choice |
 |---|---|
-| Shell | Tauri 2 (Rust) |
+| Shell | Electron 44 |
 | UI | React 19 + Vite 7 + TypeScript |
 | Styling | Tailwind CSS v4 |
 | Components | shadcn/ui on Base UI (`base-nova` preset) |
@@ -73,20 +73,17 @@ The intent is that any CLI agent works, because they are just processes:
 | Validation | zod |
 | Control flow | ts-pattern |
 | Rich text | Tiptap 3 |
+| Terminal | xterm.js over node-pty |
+| Updates | electron-updater, packaged by electron-builder |
 
 ## Getting started
 
 ### Prerequisites
 
 - Node 22+ and [pnpm](https://pnpm.io)
-- [Rust](https://rustup.rs) stable, with the `clippy` and `rustfmt` components
 - Xcode Command Line Tools (macOS)
 - Visual Studio Build Tools 2022 with the "Desktop development with C++"
-  workload (Windows) — Rust links against the MSVC toolchain
-
-```sh
-rustup component add clippy rustfmt
-```
+  workload (Windows) — node-pty compiles a native addon
 
 On a machine that has Node but is otherwise fresh, one command installs all of
 the above and then the project dependencies:
@@ -101,14 +98,16 @@ Open a new terminal afterwards so the updated `PATH` applies.
 
 ```sh
 pnpm install
-pnpm tauri dev
+pnpm dev
 ```
 
 ### Build
 
 ```sh
-pnpm tauri build
+pnpm package
 ```
+
+Installers land in `release/`.
 
 ## Project layout
 
@@ -121,13 +120,11 @@ src/
 ├─ features/     vertical slices — the unit of deletion
 ├─ components/   shared presentational components (ui/ is shadcn)
 ├─ lib/          pure helpers
-└─ ipc/          the only module allowed to call Tauri
+└─ ipc/          the only module allowed to reach the main process
 
-src-tauri/src/
-├─ lib.rs        Builder assembly only
-├─ error.rs      one serializable error type
-├─ commands/     #[tauri::command] — thin
-└─ <domain>/     the actual logic, testable without Tauri
+electron/
+├─ main/         app lifecycle, the window, and one module per domain
+└─ preload/      the contextBridge: `invoke` and `on`, and nothing else
 ```
 
 Full rules: [`.claude/rules/architecture.md`](.claude/rules/architecture.md).
@@ -139,16 +136,16 @@ pnpm lint          # biome, including the import boundary rules
 pnpm lint:fix      # biome check --write
 pnpm typecheck     # tsc --noEmit
 pnpm knip          # unused files, exports and dependencies
-pnpm rust:fmt      # cargo fmt
-pnpm rust:lint     # cargo clippy -D warnings
-pnpm rust:test     # cargo test
+pnpm test          # vitest, the main-process modules
+pnpm build         # typecheck, then build main, preload and renderer
+pnpm package       # installers via electron-builder
 ```
 
 Git hooks run these automatically:
 
-- **pre-commit** — biome and rustfmt on staged files, then `typecheck` and `knip`
+- **pre-commit** — biome on staged files, then `typecheck`, `knip` and `check:locales`
 - **commit-msg** — [Conventional Commits](https://www.conventionalcommits.org)
-- **pre-push** — `cargo clippy -D warnings` and `cargo test`
+- **pre-push** — `pnpm test` and `pnpm build`
 
 ## Contributing
 

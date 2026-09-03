@@ -26,7 +26,7 @@ filesystem and repositories. Findings that are especially relevant:
 
 - Escaping the intended worktree boundary
 - Command injection through repository paths, branch names or agent output
-- Tauri IPC commands reachable from web content that should not be
+- Main-process IPC handlers reachable from renderer content that should not be
 - Leaking credentials, tokens or environment variables into logs or the UI
 
 Out of scope: vulnerabilities in the agents themselves — report those to their

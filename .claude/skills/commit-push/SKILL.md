@@ -108,7 +108,7 @@ Analyze the staged changes and generate a commitlint-compliant commit message.
 feat: add workspace recent list
 fix(ipc): normalize thrown errors into IpcResult
 refactor: move terminal state out of React
-chore: bump tauri to 2.11
+chore: bump electron to 44.1
 docs: describe the layer boundaries in README
 ```
 
@@ -128,11 +128,7 @@ pnpm lint
 # 3. 미사용 파일/의존성 검사
 pnpm knip
 
-# 4. Rust 린트 + 테스트
-pnpm rust:lint
-pnpm rust:test
-
-# 5. 프로덕션 빌드
+# 4. 프로덕션 빌드
 pnpm build
 ```
 
@@ -149,8 +145,7 @@ pnpm build
     > - TypeScript: ✅ / ❌ (에러 내용)
     > - Biome: ✅ / ❌ (에러 내용)
     > - Knip: ✅ / ❌ (에러 내용)
-    > - Clippy / cargo test: ✅ / ❌ (에러 내용)
-    > - Build: ✅ / ❌ (에러 내용)
+        > - Build: ✅ / ❌ (에러 내용)
     >
     > 2. 에러를 자동으로 수정한다. 변경된 파일뿐 아니라 프로젝트 전체 에러를 수정해야 한다.
     > 3. 수정 후 실패한 검사만 다시 실행한다.

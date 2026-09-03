@@ -9,8 +9,8 @@
 		"includes": [
 			"**",
 			"!**/dist",
-			"!**/src-tauri/target",
-			"!**/src-tauri/gen",
+			"!**/out",
+			"!**/release",
 			"!**/*.svg",
 			"!**/*.css"
 		]
@@ -57,8 +57,13 @@
 										"message": "Features must not import the app shell. Dependencies point downward only."
 									},
 									{
-										"group": ["@tauri-apps/**"],
-										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+										"group": [
+											"electron",
+											"electron/**",
+											"electron-updater",
+											"node-pty"
+										],
+										"message": "Only src/ipc may talk to the desktop shell. Add a wrapper in src/ipc/client.ts."
 									},
 									{
 										"group": ["../../**"],
@@ -85,8 +90,13 @@
 										"message": "Shared components must stay presentational: no features, no app shell, no IPC."
 									},
 									{
-										"group": ["@tauri-apps/**"],
-										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+										"group": [
+											"electron",
+											"electron/**",
+											"electron-updater",
+											"node-pty"
+										],
+										"message": "Only src/ipc may talk to the desktop shell. Add a wrapper in src/ipc/client.ts."
 									},
 									{
 										"group": ["../../**"],
@@ -118,8 +128,13 @@
 										"message": "src/lib is for pure helpers. It must not depend on any other layer."
 									},
 									{
-										"group": ["@tauri-apps/**"],
-										"message": "Only src/ipc may talk to Tauri. Add a wrapper in src/ipc/client.ts."
+										"group": [
+											"electron",
+											"electron/**",
+											"electron-updater",
+											"node-pty"
+										],
+										"message": "Only src/ipc may talk to the desktop shell. Add a wrapper in src/ipc/client.ts."
 									},
 									{
 										"group": ["../../**"],

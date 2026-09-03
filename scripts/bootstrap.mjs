@@ -34,8 +34,8 @@ const winget = (id, override) =>
 		...(override ? ["--override", override] : []),
 	]);
 
-// Rust on Windows compiles against the MSVC toolchain, which ships with the
-// Visual Studio Build Tools rather than with rustup.
+// node-pty compiles a native addon, which on Windows needs the MSVC toolchain
+// from the Visual Studio Build Tools.
 const hasMsvc = () => {
 	const vswhere =
 		"C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe";
@@ -67,20 +67,6 @@ if (isWindows && !hasMsvc()) {
 	);
 }
 
-if (has("cargo")) {
-	console.log("cargo: already installed");
-} else if (isWindows) {
-	winget("Rustlang.Rustup");
-	run("rustup", ["default", "stable"]);
-} else {
-	run("sh", [
-		"-c",
-		"curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y",
-	]);
-}
-
-run("rustup", ["component", "add", "clippy", "rustfmt"]);
-
 if (has("pnpm")) {
 	console.log("pnpm: already installed");
 } else if (isWindows) {
@@ -99,5 +85,5 @@ run(
 );
 
 console.log(
-	"\nDone. Open a new terminal so the updated PATH applies, then run: pnpm tauri dev",
+	"\nDone. Open a new terminal so the updated PATH applies, then run: pnpm dev",
 );

@@ -4,8 +4,12 @@ import type { UpdateFailure, UpdateState } from "./types";
 
 const POLL_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
+// A failed integrity check means this version is not worth retrying, however it
+// is worded: Tauri called it a signature, electron-updater calls it a checksum.
 function classify(thrown: unknown): UpdateFailure {
-	return /signature|verif/i.test(String(thrown)) ? "signature" : "offline";
+	return /signature|verif|checksum|sha\d/i.test(String(thrown))
+		? "signature"
+		: "offline";
 }
 
 export function useUpdater() {

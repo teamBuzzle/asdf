@@ -49,6 +49,19 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* The strip the renderer draws where the OS title bar used to be. Dragging it
+   moves the window and double-clicking it maximises; anything interactive
+   inside it opts back out. */
+.title-bar {
+    -webkit-app-region: drag;
+    height: 36px;
+}
+.title-bar button,
+.title-bar input,
+.title-bar a {
+    -webkit-app-region: no-drag;
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

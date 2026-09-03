@@ -1,6 +1,5 @@
-// Contract with `src-tauri/src/commands`. Keep in sync by hand for now.
-// ponytail: hand-written contract; generate with tauri-specta once the
-// command count makes drift likely (see .claude/rules/architecture.md).
+// The contract between `electron/main` and the renderer. Both sides import this
+// file, so there is nothing to keep in sync by hand.
 
 export type WorkspaceInfo = {
 	path: string;
@@ -20,14 +19,32 @@ export type TerminalOutput = {
 	chunk: string;
 };
 
-/** Emitted by the Rust reader thread for every chunk a session prints. */
+/** What the main process knows about a pending release. */
+export type UpdateInfo = {
+	version: string;
+	/** The version running right now, so the dialog can show both. */
+	currentVersion: string;
+	/** Release notes, as shown in the update dialog. */
+	body: string | null;
+};
+
+/** Progress of an update download, as the renderer's `Update` facade sees it. */
+export type DownloadProgress = {
+	transferred: number;
+	total: number | null;
+};
+
+/** Emitted for every chunk a session prints. */
 export const TERMINAL_OUTPUT_EVENT = "terminal://output";
 
 /** Emitted once with the session id when its shell has ended. */
 export const TERMINAL_EXIT_EVENT = "terminal://exit";
 
-/** Text an IME has committed natively, bypassing WebKit's broken composition. */
-export const IME_COMMIT_EVENT = "ime://commit";
+/** Emitted while an update downloads. */
+export const UPDATER_PROGRESS_EVENT = "updater://progress";
 
-/** Text an IME is still composing. Replaces the previous preedit; "" clears it. */
-export const IME_PREEDIT_EVENT = "ime://preedit";
+/**
+ * Emitted when the window is about to close. The renderer runs whatever it has
+ * to do on the way out and then acknowledges, which is what actually closes it.
+ */
+export const WINDOW_CLOSE_REQUESTED_EVENT = "window://close-requested";

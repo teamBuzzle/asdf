@@ -14,8 +14,7 @@ permissions:
 
 jobs:
   ci:
-    # macOS so the Tauri crate builds without the Linux webkit2gtk system packages.
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
@@ -26,20 +25,26 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm knip
       - run: pnpm check:locales
-      # The Tauri crate reads ../dist at build time, so build the frontend first.
+      # The pty tests spawn a real shell, so they need a shell that behaves like
+      # the ones users get. Ubuntu covers /bin/sh; Windows covers ConPTY, which
+      # is where every pty defect in this repository has come from.
+      - run: pnpm test
       - run: pnpm build
 
-      - run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
-      - run: pnpm rust:lint
-      - run: pnpm rust:test
+  pty-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test

@@ -2,6 +2,11 @@
 	"app": {
 		"title": "asdf"
 	},
+	"window": {
+		"minimize": "最小化",
+		"maximize": "最大化",
+		"close": "閉じる"
+	},
 	"update": {
 		"chip": {
 			"available": "アップデート {{version}}",

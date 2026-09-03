@@ -14,8 +14,8 @@ permissions:
 
 jobs:
   # Keeps a rolling "chore(main): release x.y.z" pull request open. Merging it
-  # bumps the version everywhere, writes CHANGELOG.md and creates the tag and
-  # the GitHub release. Nothing releases until a human merges that PR.
+  # bumps the version, writes CHANGELOG.md and creates the tag and the GitHub
+  # release. Nothing releases until a human merges that PR.
   release-please:
     runs-on: ubuntu-latest
     outputs:
@@ -28,34 +28,20 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  # Builds installers for every platform and attaches them, plus the signed
-  # latest.json the updater reads, to the release release-please just created.
+  # Builds installers for every platform and attaches them, plus the metadata
+  # electron-updater reads, to the release release-please just created.
   build:
     needs: release-please
     if: needs.release-please.outputs.released == 'true'
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: macos-latest
-            args: --target aarch64-apple-darwin
-          - platform: macos-latest
-            args: --target x86_64-apple-darwin
-          - platform: ubuntu-22.04
-            args: ""
-          - platform: windows-latest
-            args: ""
+        platform: [macos-latest, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.release-please.outputs.tag }}
-
-      - name: Install Linux build dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
@@ -64,23 +50,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-          key: ${{ matrix.args }}
+      - run: pnpm build
 
-      - uses: tauri-apps/tauri-action@action-v1.0.0
+      # electron-builder publishes the installers and the latest*.yml files the
+      # in-app updater polls. GH_TOKEN is what lets it attach them to the tag.
+      - run: pnpm exec electron-builder --publish always
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        with:
-          tagName: ${{ needs.release-please.outputs.tag }}
-          releaseName: ${{ needs.release-please.outputs.tag }}
-          releaseDraft: false
-          prerelease: false
-          includeUpdaterJson: true
-          args: ${{ matrix.args }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

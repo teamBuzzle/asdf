@@ -6,25 +6,14 @@ import { useTerminalSession } from "../use-terminal-session";
 export function TerminalPane() {
 	const { t } = useTranslation();
 	const host = useRef<HTMLDivElement | null>(null);
-	const { session, preedit } = useTerminalSession(host);
+	const { session } = useTerminalSession(host);
 
 	return (
-		<div className="relative min-h-0 overflow-hidden">
-			{/* The emulator owns this element's children; never render into it. */}
-			<div ref={host} className="absolute inset-0" />
-
-			{preedit && (
-				<span
-					className="pointer-events-none absolute whitespace-pre bg-black font-mono text-sm text-white underline decoration-white/70 underline-offset-2"
-					style={{
-						left: `${preedit.left}px`,
-						top: `${preedit.top}px`,
-						lineHeight: `${preedit.height}px`,
-					}}
-				>
-					{preedit.text}
-				</span>
-			)}
+		<div className="relative min-h-0 overflow-hidden bg-black">
+			{/* The emulator owns this element's children; never render into it. The
+			    padding is on this element on purpose: the fit addon subtracts it
+			    when sizing the grid, and the black behind it is the emulator's own. */}
+			<div ref={host} className="absolute inset-0 px-3 py-2" />
 
 			{match(session)
 				.with({ status: "starting" }, () => (

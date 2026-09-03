@@ -1,6 +1,6 @@
 # asdf
 
-An agentic development environment (ADE): a Tauri 2 + React 19 desktop app for
+An agentic development environment (ADE): an Electron + React 19 desktop app for
 running coding agents such as Claude Code, Codex and Gemini CLI against
 repositories in parallel, each in its own git worktree.
 
@@ -54,12 +54,13 @@ file must carry the same key set as `en.json`.
 ## Commands
 
 ```sh
-pnpm tauri dev                # run the app
+pnpm dev                      # run the app
 pnpm lint / lint:fix          # biome, includes the layer boundary rules
 pnpm typecheck                # tsc --noEmit
 pnpm knip                     # unused files, exports, dependencies
-pnpm rust:lint                # cargo clippy -D warnings
-pnpm rust:test                # cargo test
+pnpm test                     # vitest, the main-process modules
+pnpm build                    # typecheck, then build main, preload and renderer
+pnpm package                  # build and produce installers with electron-builder
 ```
 
 ## Git and pull requests must go through the skills
@@ -152,8 +153,7 @@ required status check. Never weaken it to make a change pass.
 
 Versions are never edited by hand. release-please derives them from Conventional
 Commit types on `main`, keeps a `chore(main): release x.y.z` pull request open,
-and bumps `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`
-in one commit alongside `CHANGELOG.md`.
+and bumps `package.json` in one commit alongside `CHANGELOG.md`.
 
 `fix:` is a patch, `feat:` a minor, `feat!:` or a `BREAKING CHANGE:` footer a
 major once past 1.0. `chore:`, `docs:`, `ci:`, `style:` and `test:` release
@@ -161,20 +161,20 @@ nothing — so choosing the wrong prefix silently changes what users receive.
 
 Merging the release pull request tags the release and triggers
 `.github/workflows/release.yml`, which builds installers for macOS, Windows and
-Linux and attaches them plus a signed `latest.json` to the GitHub release. The
-app checks that file on startup and offers the update in-app.
+Linux with electron-builder and attaches them plus the `latest*.yml` files
+electron-updater reads to the GitHub release. The app checks those on startup and
+offers the update in-app.
 
-The updater private key lives only in the `TAURI_SIGNING_PRIVATE_KEY` repository
-secret. It is not in the repository and must not be. Losing it means installed
-apps can never be updated again — a new key would fail signature verification on
-every existing install.
+Publishing uses the workflow's `GITHUB_TOKEN`; there is no separate signing key
+to lose. Code signing certificates are a separate question and are not set up
+yet, so installers are unsigned and the OS will warn on first run.
 
 ## Gates
 
-pre-commit runs `lint-staged`: biome → rustfmt → `pnpm typecheck` → `pnpm knip`,
-serially, on the staged snapshot. commit-msg runs commitlint. pre-push runs
-clippy and `cargo test`. All of these must stay green; never add `--no-verify`
-to a workflow.
+pre-commit runs `lint-staged`: biome → `pnpm typecheck` → `pnpm knip` →
+`pnpm check:locales`, serially, on the staged snapshot. commit-msg runs
+commitlint. pre-push runs `pnpm test` and `pnpm build`. All of these must stay green; never add
+`--no-verify` to a workflow.
 
 ## Conventions
 

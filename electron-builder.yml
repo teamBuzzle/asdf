@@ -1,0 +1,50 @@
+appId: tools.buzzle.asdf
+productName: asdf
+copyright: Copyright © teamBuzzle
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**
+  - package.json
+
+# node-pty ships N-API prebuilds, which are ABI-stable and load under Electron
+# as they are. Rebuilding them from source would need Python and a compiler on
+# every machine that packages the app, to produce the binary already in the box.
+npmRebuild: false
+
+# node-pty ships a native addon and, on Windows, conpty.dll plus OpenConsole.exe
+# next to it. Unpacked so the loader can find them inside the installed app.
+asarUnpack:
+  - "**/node_modules/node-pty/**"
+
+publish:
+  provider: github
+  owner: teamBuzzle
+  repo: asdf
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+
+linux:
+  category: Development
+  target:
+    - AppImage
+    - deb
