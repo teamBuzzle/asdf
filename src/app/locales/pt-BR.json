@@ -50,6 +50,114 @@
 			"openRelease": "Abrir a página da versão"
 		}
 	},
+	"session": {
+		"sidebarLabel": "Sessões",
+		"needsYou": "Precisa de você",
+		"empty": "Nenhuma sessão selecionada.",
+		"changed": "{{n}} alterados",
+		"status": {
+			"waiting": "Aguardando",
+			"failed": "Falhou",
+			"done": "Pronto",
+			"running": "Em execução",
+			"idle": "Ociosa"
+		},
+		"agentPane": {
+			"placeholder": "A sessão do agente roda aqui."
+		},
+		"approve": {
+			"allow": "Permitir",
+			"deny": "Negar"
+		},
+		"changes": {
+			"reviewedDivider": "Revisados",
+			"reviewedCount": "{{done}} de {{total}} revisados",
+			"approve": "Aprovar",
+			"revert": "Reverter",
+			"empty": "Nada alterado ainda.",
+			"title": "Alterações"
+		},
+		"create": {
+			"title": "Nova sessão",
+			"what": "O que você vai fazer?",
+			"whatPlaceholder": "Corrigir o loop de redirecionamento",
+			"agent": "Agente",
+			"cancel": "Cancelar",
+			"start": "Começar",
+			"inProject": "Em {{project}}."
+		},
+		"files": {
+			"search": "Buscar arquivos",
+			"noMatch": "Nada corresponde.",
+			"pick": "Escolha um arquivo para ler.",
+			"noPreview": "Este arquivo não tem pré-visualização.",
+			"title": "Arquivos",
+			"noSession": "Nenhuma sessão aberta.",
+			"empty": "Vazio.",
+			"byName": "Nome · {{n}}",
+			"byContent": "Conteúdo · {{n}}"
+		},
+		"pane": {
+			"empty": "Escolha uma sessão para abri-la aqui.",
+			"close": "Fechar janela",
+			"open": "{{n}} abertas"
+		},
+		"newProject": "Novo projeto",
+		"newSession": "Nova sessão neste projeto",
+		"project": {
+			"title": "Novo projeto",
+			"subtitle": "Um projeto é um repositório. As sessões são criadas dentro dele.",
+			"folder": "Pasta",
+			"name": "Nome do projeto",
+			"namePlaceholder": "web",
+			"group": "Grupo",
+			"groupPlaceholder": "Trabalho",
+			"add": "Adicionar",
+			"check": "Verificar",
+			"checkHint": "Aponte para um repositório git.",
+			"checking": "Verificando…"
+		},
+		"sidePanel": "Painel do projeto"
+	},
+	"settings": {
+		"title": "Configurações",
+		"subtitle": "Valem apenas para esta máquina.",
+		"theme": "Tema",
+		"themes": {
+			"system": "Sistema",
+			"light": "Claro",
+			"dark": "Escuro"
+		},
+		"language": "Idioma",
+		"close": "Fechar"
+	},
+	"github": {
+		"issues": "Issues",
+		"pulls": "Pull requests",
+		"noIssues": "Nenhuma issue.",
+		"noPulls": "Nenhum pull request.",
+		"missing": "Não existe mais.",
+		"state": {
+			"open": "Aberta",
+			"closed": "Fechada",
+			"draft": "Rascunho",
+			"merged": "Mesclado"
+		},
+		"ci": {
+			"pass": "CI passando",
+			"fail": "CI falhando",
+			"pending": "CI em execução"
+		}
+	},
+	"scm": {
+		"message": "Mensagem do commit",
+		"messagePlaceholder": "Mensagem",
+		"commit": "Fazer commit",
+		"branch": "Branch",
+		"basedOn": "Baseada em {{branch}}",
+		"worktrees": "Worktrees",
+		"changes": "Alterações"
+	},
 	"terminal": {
 		"starting": "Iniciando o shell…",
 		"failed": "Não foi possível iniciar o shell.",

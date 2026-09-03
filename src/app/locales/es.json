@@ -50,6 +50,114 @@
 			"openRelease": "Abrir la página de la versión"
 		}
 	},
+	"session": {
+		"sidebarLabel": "Sesiones",
+		"needsYou": "Te necesita",
+		"empty": "Ninguna sesión seleccionada.",
+		"changed": "{{n}} cambiados",
+		"status": {
+			"waiting": "En espera",
+			"failed": "Falló",
+			"done": "Listo",
+			"running": "En curso",
+			"idle": "Inactiva"
+		},
+		"agentPane": {
+			"placeholder": "La sesión del agente se ejecuta aquí."
+		},
+		"approve": {
+			"allow": "Permitir",
+			"deny": "Denegar"
+		},
+		"changes": {
+			"reviewedDivider": "Revisados",
+			"reviewedCount": "{{done}} de {{total}} revisados",
+			"approve": "Aprobar",
+			"revert": "Revertir",
+			"empty": "Todavía no hay cambios.",
+			"title": "Cambios"
+		},
+		"create": {
+			"title": "Nueva sesión",
+			"what": "¿Qué vas a hacer?",
+			"whatPlaceholder": "Arreglar el bucle de redirección",
+			"agent": "Agente",
+			"cancel": "Cancelar",
+			"start": "Empezar",
+			"inProject": "En {{project}}."
+		},
+		"files": {
+			"search": "Buscar archivos",
+			"noMatch": "No hay coincidencias.",
+			"pick": "Elige un archivo para leerlo.",
+			"noPreview": "Este archivo no tiene vista previa.",
+			"title": "Archivos",
+			"noSession": "Ninguna sesión abierta.",
+			"empty": "Vacío.",
+			"byName": "Nombre · {{n}}",
+			"byContent": "Contenido · {{n}}"
+		},
+		"pane": {
+			"empty": "Elige una sesión para abrirla aquí.",
+			"close": "Cerrar ventana",
+			"open": "{{n}} abiertas"
+		},
+		"newProject": "Nuevo proyecto",
+		"newSession": "Nueva sesión en este proyecto",
+		"project": {
+			"title": "Nuevo proyecto",
+			"subtitle": "Un proyecto es un repositorio. Las sesiones se crean dentro.",
+			"folder": "Carpeta",
+			"name": "Nombre del proyecto",
+			"namePlaceholder": "web",
+			"group": "Grupo",
+			"groupPlaceholder": "Trabajo",
+			"add": "Añadir",
+			"check": "Comprobar",
+			"checkHint": "Apunta a un repositorio git.",
+			"checking": "Comprobando…"
+		},
+		"sidePanel": "Panel del proyecto"
+	},
+	"settings": {
+		"title": "Ajustes",
+		"subtitle": "Solo se aplican a este equipo.",
+		"theme": "Tema",
+		"themes": {
+			"system": "Sistema",
+			"light": "Claro",
+			"dark": "Oscuro"
+		},
+		"language": "Idioma",
+		"close": "Cerrar"
+	},
+	"github": {
+		"issues": "Incidencias",
+		"pulls": "Pull requests",
+		"noIssues": "Sin incidencias.",
+		"noPulls": "Sin pull requests.",
+		"missing": "Ya no existe.",
+		"state": {
+			"open": "Abierta",
+			"closed": "Cerrada",
+			"draft": "Borrador",
+			"merged": "Fusionado"
+		},
+		"ci": {
+			"pass": "CI en verde",
+			"fail": "CI en rojo",
+			"pending": "CI en curso"
+		}
+	},
+	"scm": {
+		"message": "Mensaje de commit",
+		"messagePlaceholder": "Mensaje",
+		"commit": "Confirmar",
+		"branch": "Rama",
+		"basedOn": "Basada en {{branch}}",
+		"worktrees": "Worktrees",
+		"changes": "Cambios"
+	},
 	"terminal": {
 		"starting": "Iniciando el shell…",
 		"failed": "No se pudo iniciar el shell.",

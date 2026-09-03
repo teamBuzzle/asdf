@@ -50,6 +50,114 @@
 			"openRelease": "リリースページを開く"
 		}
 	},
+	"session": {
+		"sidebarLabel": "セッション",
+		"needsYou": "要対応",
+		"empty": "セッションが選択されていません。",
+		"changed": "変更 {{n}} 件",
+		"status": {
+			"waiting": "待機中",
+			"failed": "失敗",
+			"done": "完了",
+			"running": "実行中",
+			"idle": "アイドル"
+		},
+		"agentPane": {
+			"placeholder": "ここでエージェントのセッションが実行されます。"
+		},
+		"approve": {
+			"allow": "許可",
+			"deny": "拒否"
+		},
+		"changes": {
+			"reviewedDivider": "レビュー済み",
+			"reviewedCount": "{{total}} 件中 {{done}} 件レビュー済み",
+			"approve": "承認",
+			"revert": "取り消し",
+			"empty": "まだ変更はありません。",
+			"title": "変更"
+		},
+		"create": {
+			"title": "新しいセッション",
+			"what": "何をしますか?",
+			"whatPlaceholder": "リダイレクトループを修正",
+			"agent": "エージェント",
+			"cancel": "キャンセル",
+			"start": "開始",
+			"inProject": "{{project}} の中に作ります。"
+		},
+		"files": {
+			"search": "ファイル検索",
+			"noMatch": "一致するファイルがありません。",
+			"pick": "ファイルを選ぶと内容が表示されます。",
+			"noPreview": "このファイルにプレビューはありません。",
+			"title": "ファイル",
+			"noSession": "開いているセッションがありません。",
+			"empty": "空です。",
+			"byName": "名前 · {{n}}",
+			"byContent": "内容 · {{n}}"
+		},
+		"pane": {
+			"empty": "セッションを選ぶとここに開きます。",
+			"close": "ウィンドウを閉じる",
+			"open": "{{n}} 件を表示中"
+		},
+		"newProject": "新しいプロジェクト",
+		"newSession": "このプロジェクトにセッションを追加",
+		"project": {
+			"title": "新しいプロジェクト",
+			"subtitle": "プロジェクトはリポジトリです。セッションはその中に作ります。",
+			"folder": "フォルダー",
+			"name": "プロジェクト名",
+			"namePlaceholder": "web",
+			"group": "グループ",
+			"groupPlaceholder": "仕事",
+			"add": "追加",
+			"check": "確認",
+			"checkHint": "git リポジトリを指定してください。",
+			"checking": "確認中…"
+		},
+		"sidePanel": "プロジェクトパネル"
+	},
+	"settings": {
+		"title": "設定",
+		"subtitle": "この端末にのみ適用されます。",
+		"theme": "テーマ",
+		"themes": {
+			"system": "システム",
+			"light": "ライト",
+			"dark": "ダーク"
+		},
+		"language": "言語",
+		"close": "閉じる"
+	},
+	"github": {
+		"issues": "イシュー",
+		"pulls": "プルリクエスト",
+		"noIssues": "イシューはありません。",
+		"noPulls": "プルリクエストはありません。",
+		"missing": "見つかりません。",
+		"state": {
+			"open": "オープン",
+			"closed": "クローズ",
+			"draft": "下書き",
+			"merged": "マージ済み"
+		},
+		"ci": {
+			"pass": "CI 成功",
+			"fail": "CI 失敗",
+			"pending": "CI 実行中"
+		}
+	},
+	"scm": {
+		"message": "コミットメッセージ",
+		"messagePlaceholder": "メッセージ",
+		"commit": "コミット",
+		"branch": "ブランチ",
+		"basedOn": "{{branch}} が基点",
+		"worktrees": "ワークツリー",
+		"changes": "変更"
+	},
 	"terminal": {
 		"starting": "シェルを起動中…",
 		"failed": "シェルを起動できませんでした。",

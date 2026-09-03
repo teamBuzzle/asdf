@@ -50,6 +50,114 @@
 			"openRelease": "打开发布页"
 		}
 	},
+	"session": {
+		"sidebarLabel": "会话",
+		"needsYou": "待处理",
+		"empty": "未选择会话。",
+		"changed": "{{n}} 个变更",
+		"status": {
+			"waiting": "等待中",
+			"failed": "失败",
+			"done": "完成",
+			"running": "运行中",
+			"idle": "空闲"
+		},
+		"agentPane": {
+			"placeholder": "智能体会话将在此运行。"
+		},
+		"approve": {
+			"allow": "允许",
+			"deny": "拒绝"
+		},
+		"changes": {
+			"reviewedDivider": "已审查",
+			"reviewedCount": "已审查 {{done}} / {{total}}",
+			"approve": "通过",
+			"revert": "撤销",
+			"empty": "暂无变更。",
+			"title": "变更"
+		},
+		"create": {
+			"title": "新建会话",
+			"what": "要做什么?",
+			"whatPlaceholder": "修复重定向循环",
+			"agent": "智能体",
+			"cancel": "取消",
+			"start": "开始",
+			"inProject": "创建于 {{project}}。"
+		},
+		"files": {
+			"search": "搜索文件",
+			"noMatch": "没有匹配的文件。",
+			"pick": "选择文件即可查看内容。",
+			"noPreview": "该文件没有可预览的内容。",
+			"title": "文件",
+			"noSession": "没有打开的会话。",
+			"empty": "空。",
+			"byName": "名称 · {{n}}",
+			"byContent": "内容 · {{n}}"
+		},
+		"pane": {
+			"empty": "选择一个会话即可在此打开。",
+			"close": "关闭窗口",
+			"open": "已打开 {{n}} 个"
+		},
+		"newProject": "新建项目",
+		"newSession": "在此项目中新建会话",
+		"project": {
+			"title": "新建项目",
+			"subtitle": "项目就是仓库，会话在项目内创建。",
+			"folder": "文件夹",
+			"name": "项目名称",
+			"namePlaceholder": "web",
+			"group": "分组",
+			"groupPlaceholder": "工作",
+			"add": "添加",
+			"check": "检查",
+			"checkHint": "指向一个 git 仓库。",
+			"checking": "检查中…"
+		},
+		"sidePanel": "项目面板"
+	},
+	"settings": {
+		"title": "设置",
+		"subtitle": "仅对本机生效。",
+		"theme": "主题",
+		"themes": {
+			"system": "跟随系统",
+			"light": "浅色",
+			"dark": "深色"
+		},
+		"language": "语言",
+		"close": "关闭"
+	},
+	"github": {
+		"issues": "议题",
+		"pulls": "拉取请求",
+		"noIssues": "没有议题。",
+		"noPulls": "没有拉取请求。",
+		"missing": "已不存在。",
+		"state": {
+			"open": "开启",
+			"closed": "已关闭",
+			"draft": "草稿",
+			"merged": "已合并"
+		},
+		"ci": {
+			"pass": "CI 通过",
+			"fail": "CI 失败",
+			"pending": "CI 运行中"
+		}
+	},
+	"scm": {
+		"message": "提交信息",
+		"messagePlaceholder": "信息",
+		"commit": "提交",
+		"branch": "分支",
+		"basedOn": "基于 {{branch}}",
+		"worktrees": "工作树",
+		"changes": "更改"
+	},
 	"terminal": {
 		"starting": "正在启动 shell…",
 		"failed": "无法启动 shell。",
