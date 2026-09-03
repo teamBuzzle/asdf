@@ -54,7 +54,12 @@ electron/
 
 `index.ts` holds no logic. Handlers parse arguments, call into a module beside
 them, and return its `IpcResult`. That is what keeps the modules testable without
-starting Electron.
+starting Electron: `terminal.ts` and `workspace.ts` import nothing from
+`electron`, so `electron/**/*.test.ts` runs under plain Node with vitest.
+
+Keep that property. A module that reaches for `app` or `BrowserWindow` belongs in
+`index.ts`, and moving one out of reach of the tests is a bigger cost than the
+convenience it buys.
 
 ## The IPC contract
 

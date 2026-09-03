@@ -32,7 +32,7 @@ pnpm dev
 pnpm lint
 pnpm typecheck
 pnpm knip
-pnpm build
+pnpm test
 pnpm build
 ```
 

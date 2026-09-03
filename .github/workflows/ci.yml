@@ -29,4 +29,22 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm knip
       - run: pnpm check:locales
+      # The pty tests spawn a real shell, so they need a shell that behaves like
+      # the ones users get. Ubuntu covers /bin/sh; Windows covers ConPTY, which
+      # is where every pty defect in this repository has come from.
+      - run: pnpm test
       - run: pnpm build
+
+  pty-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm test

@@ -136,6 +136,7 @@ pnpm lint          # biome, including the import boundary rules
 pnpm lint:fix      # biome check --write
 pnpm typecheck     # tsc --noEmit
 pnpm knip          # unused files, exports and dependencies
+pnpm test          # vitest, the main-process modules
 pnpm build         # typecheck, then build main, preload and renderer
 pnpm package       # installers via electron-builder
 ```
@@ -144,7 +145,7 @@ Git hooks run these automatically:
 
 - **pre-commit** — biome on staged files, then `typecheck`, `knip` and `check:locales`
 - **commit-msg** — [Conventional Commits](https://www.conventionalcommits.org)
-- **pre-push** — `pnpm build`
+- **pre-push** — `pnpm test` and `pnpm build`
 
 ## Contributing
 

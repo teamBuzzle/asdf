@@ -58,6 +58,7 @@ pnpm dev                      # run the app
 pnpm lint / lint:fix          # biome, includes the layer boundary rules
 pnpm typecheck                # tsc --noEmit
 pnpm knip                     # unused files, exports, dependencies
+pnpm test                     # vitest, the main-process modules
 pnpm build                    # typecheck, then build main, preload and renderer
 pnpm package                  # build and produce installers with electron-builder
 ```
@@ -172,7 +173,7 @@ yet, so installers are unsigned and the OS will warn on first run.
 
 pre-commit runs `lint-staged`: biome → `pnpm typecheck` → `pnpm knip` →
 `pnpm check:locales`, serially, on the staged snapshot. commit-msg runs
-commitlint. pre-push runs `pnpm build`. All of these must stay green; never add
+commitlint. pre-push runs `pnpm test` and `pnpm build`. All of these must stay green; never add
 `--no-verify` to a workflow.
 
 ## Conventions
