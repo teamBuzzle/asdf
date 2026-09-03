@@ -8,9 +8,6 @@
 		"idle": "Pick a folder to open.",
 		"opening": "Opening…"
 	},
-	"notes": {
-		"title": "Notes"
-	},
 	"update": {
 		"chip": {
 			"available": "Update {{version}}",
@@ -58,5 +55,110 @@
 			"close": "Close",
 			"openRelease": "Open release page"
 		}
+	},
+	"session": {
+		"sidebarLabel": "Sessions",
+		"needsYou": "Needs you",
+		"empty": "No session selected.",
+		"changed": "{{n}} changed",
+		"status": {
+			"waiting": "Waiting",
+			"failed": "Failed",
+			"done": "Done",
+			"running": "Running",
+			"idle": "Idle"
+		},
+		"agentPane": {
+			"placeholder": "The agent session runs here."
+		},
+		"approve": {
+			"allow": "Allow",
+			"deny": "Deny"
+		},
+		"changes": {
+			"reviewedDivider": "Reviewed",
+			"reviewedCount": "{{done}} of {{total}} reviewed",
+			"approve": "Approve",
+			"revert": "Revert",
+			"empty": "Nothing changed yet.",
+			"title": "Changes"
+		},
+		"create": {
+			"title": "New session",
+			"what": "What are you doing?",
+			"whatPlaceholder": "Fix the redirect loop",
+			"agent": "Agent",
+			"cancel": "Cancel",
+			"start": "Start",
+			"inProject": "In {{project}}."
+		},
+		"files": {
+			"search": "Search files",
+			"noMatch": "Nothing matches.",
+			"pick": "Pick a file to read it.",
+			"noPreview": "No preview for this file.",
+			"title": "Files",
+			"noSession": "No session open.",
+			"empty": "Empty.",
+			"byName": "Name · {{n}}",
+			"byContent": "Contents · {{n}}"
+		},
+		"pane": {
+			"empty": "Pick a session to open it here.",
+			"close": "Close window",
+			"open": "{{n}} open"
+		},
+		"newProject": "New project",
+		"newSession": "New session in this project",
+		"project": {
+			"title": "New project",
+			"subtitle": "A project is a repository. Sessions are made inside it.",
+			"folder": "Folder",
+			"name": "Project name",
+			"namePlaceholder": "web",
+			"group": "Group",
+			"groupPlaceholder": "Work",
+			"add": "Add"
+		},
+		"sidePanel": "Project panel"
+	},
+	"settings": {
+		"title": "Settings",
+		"subtitle": "Applies to this machine only.",
+		"theme": "Theme",
+		"themes": {
+			"system": "System",
+			"light": "Light",
+			"dark": "Dark"
+		},
+		"language": "Language",
+		"close": "Close"
+	},
+	"github": {
+		"issues": "Issues",
+		"pulls": "Pull requests",
+		"noIssues": "No issues.",
+		"noPulls": "No pull requests.",
+		"missing": "That is gone.",
+		"state": {
+			"open": "Open",
+			"closed": "Closed",
+			"draft": "Draft",
+			"merged": "Merged"
+		},
+		"ci": {
+			"pass": "CI passing",
+			"fail": "CI failing",
+			"pending": "CI running"
+		}
+	},
+	"scm": {
+		"message": "Commit message",
+		"messagePlaceholder": "Message",
+		"commit": "Commit",
+		"branch": "Branch",
+		"basedOn": "Based on {{branch}}",
+		"worktrees": "Worktrees",
+		"changes": "Changes"
 	}
 }

@@ -4,9 +4,15 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { WorkspaceInfo } from "@/ipc/bindings";
 import { useWorkspaces } from "../use-workspaces";
 
-export function WorkspaceOpener() {
+type Props = {
+	/** Fires once a folder resolves, so a caller can adopt the repository. */
+	onOpened?: (workspace: WorkspaceInfo) => void;
+};
+
+export function WorkspaceOpener({ onOpened }: Props) {
 	const { t } = useTranslation();
 	const { state, recent, open } = useWorkspaces();
 	const [draft, setDraft] = useState("");
@@ -17,7 +23,9 @@ export function WorkspaceOpener() {
 				className="flex gap-2"
 				onSubmit={(event) => {
 					event.preventDefault();
-					open(draft);
+					void open(draft).then((workspace) => {
+						if (workspace) onOpened?.(workspace);
+					});
 				}}
 			>
 				<Input
