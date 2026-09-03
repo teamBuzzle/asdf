@@ -1,4 +1,11 @@
-import type { AppError, WorkspaceInfo } from "./bindings";
+import type {
+	AppError,
+	DiffRow,
+	Issue,
+	PullRequest,
+	RepoSnapshot,
+	WorkspaceInfo,
+} from "./bindings";
 import { bridge } from "./bridge";
 
 export type IpcResult<T> =
@@ -38,4 +45,17 @@ export const ipc = {
 	resizeTerminal: (id: number, cols: number, rows: number) =>
 		call<void>("resize_terminal", { id, cols, rows }),
 	closeTerminal: (id: number) => call<void>("close_terminal", { id }),
+	/** Where the shell behind a terminal is right now; null when unknown. */
+	terminalCwd: (id: number) => call<string | null>("terminal://cwd", { id }),
+	repoSnapshot: (cwd: string) => call<RepoSnapshot>("repo://snapshot", { cwd }),
+	repoDiff: (root: string, file: string) =>
+		call<DiffRow[]>("repo://diff", { root, file }),
+	repoRead: (dir: string, file: string) =>
+		call<string[]>("repo://read", { dir, file }),
+	repoRevert: (root: string, file: string) =>
+		call<null>("repo://revert", { root, file }),
+	repoCommit: (root: string, message: string) =>
+		call<null>("repo://commit", { root, message }),
+	repoIssues: (cwd: string) => call<Issue[]>("repo://issues", { cwd }),
+	repoPulls: (cwd: string) => call<PullRequest[]>("repo://pulls", { cwd }),
 };

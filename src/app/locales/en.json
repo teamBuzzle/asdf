@@ -5,7 +5,9 @@
 	"window": {
 		"minimize": "Minimize",
 		"maximize": "Maximize",
-		"close": "Close"
+		"close": "Close",
+		"toggleSidebar": "Toggle sidebar",
+		"togglePanel": "Toggle panel"
 	},
 	"update": {
 		"chip": {
@@ -53,27 +55,17 @@
 			"retry": "Try again",
 			"close": "Close",
 			"openRelease": "Open release page"
+		},
+		"footer": {
+			"check": "Check for updates",
+			"checking": "Checking…",
+			"upToDate": "Up to date"
 		}
 	},
 	"session": {
 		"sidebarLabel": "Sessions",
-		"needsYou": "Needs you",
 		"empty": "No session selected.",
 		"changed": "{{n}} changed",
-		"status": {
-			"waiting": "Waiting",
-			"failed": "Failed",
-			"done": "Done",
-			"running": "Running",
-			"idle": "Idle"
-		},
-		"agentPane": {
-			"placeholder": "The agent session runs here."
-		},
-		"approve": {
-			"allow": "Allow",
-			"deny": "Deny"
-		},
 		"changes": {
 			"reviewedDivider": "Reviewed",
 			"reviewedCount": "{{done}} of {{total}} reviewed",
@@ -81,15 +73,6 @@
 			"revert": "Revert",
 			"empty": "Nothing changed yet.",
 			"title": "Changes"
-		},
-		"create": {
-			"title": "New session",
-			"what": "What are you doing?",
-			"whatPlaceholder": "Fix the redirect loop",
-			"agent": "Agent",
-			"cancel": "Cancel",
-			"start": "Start",
-			"inProject": "In {{project}}."
 		},
 		"files": {
 			"search": "Search files",
@@ -100,29 +83,25 @@
 			"noSession": "No session open.",
 			"empty": "Empty.",
 			"byName": "Name · {{n}}",
-			"byContent": "Contents · {{n}}"
+			"byContent": "Contents · {{n}}",
+			"loading": "Loading…"
 		},
 		"pane": {
-			"empty": "Pick a session to open it here.",
 			"close": "Close window",
 			"open": "{{n}} open"
 		},
-		"newProject": "New project",
-		"newSession": "New session in this project",
-		"project": {
-			"title": "New project",
-			"subtitle": "A project is a repository. Sessions are made inside it.",
-			"folder": "Folder",
-			"name": "Project name",
+		"newSession": "New terminal",
+		"sidePanel": "Project panel",
+		"newWorkspace": "New workspace",
+		"terminalTitle": "Terminal {{n}}",
+		"removeWorkspace": "Remove workspace",
+		"workspace": {
+			"title": "New workspace",
+			"name": "Workspace name",
 			"namePlaceholder": "web",
-			"group": "Group",
-			"groupPlaceholder": "Work",
-			"add": "Add",
-			"check": "Check",
-			"checkHint": "Point at a git repository.",
-			"checking": "Checking…"
-		},
-		"sidePanel": "Project panel"
+			"cancel": "Cancel",
+			"create": "Create"
+		}
 	},
 	"settings": {
 		"title": "Settings",
@@ -152,16 +131,18 @@
 			"pass": "CI passing",
 			"fail": "CI failing",
 			"pending": "CI running"
-		}
+		},
+		"refresh": "Refresh"
 	},
 	"scm": {
 		"message": "Commit message",
 		"messagePlaceholder": "Message",
 		"commit": "Commit",
 		"branch": "Branch",
-		"basedOn": "Based on {{branch}}",
 		"worktrees": "Worktrees",
-		"changes": "Changes"
+		"changes": "Changes",
+		"notARepo": "Not a git repository.",
+		"detached": "detached"
 	},
 	"terminal": {
 		"starting": "Starting shell…",

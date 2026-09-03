@@ -7,18 +7,27 @@ import {
 	CircleDot,
 	CircleSlash,
 	Clock,
+	FileDiff,
+	Files,
 	GitBranch,
 	GitMerge,
 	GitPullRequest,
 	GitPullRequestDraft,
 	type LucideIcon,
+	RefreshCw,
 	XCircle,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Issue, Project, PullRequest, Session } from "../types";
+import type {
+	ChangedFile,
+	Issue,
+	PullRequest,
+	RepoSnapshot,
+	ReviewState,
+} from "../types";
 import { FileExplorer } from "./FileExplorer";
 
 type View = "files" | "changes" | "issues" | "pulls";
@@ -57,6 +66,13 @@ const ciTone: Record<PullRequest["ci"], string> = {
 	pending: "text-muted-foreground",
 };
 
+const viewIcon: Record<View, LucideIcon> = {
+	files: Files,
+	changes: FileDiff,
+	issues: CircleDot,
+	pulls: GitPullRequest,
+};
+
 // The single letter an editor puts next to a changed file.
 const kindLetter = { modified: "M", added: "A", deleted: "D" } as const;
 
@@ -67,24 +83,36 @@ const kindTone = {
 } as const;
 
 type Props = {
-	/** Files and changes follow the open tab; issues and pull requests follow
-	 *  the project, because that is what they belong to. */
-	session?: Session;
-	project?: Project;
-	/** Every session of the project — one worktree each. */
-	projectSessions: Session[];
-	onOpenFile: (sessionId: string, path: string) => void;
-	onOpenSession: (sessionId: string) => void;
+	/** Where the terminal on screen is; null while nothing is open. */
+	cwd: string | null;
+	repo: RepoSnapshot | null;
+	/** Why git could not answer, when it could not. */
+	error: string | null;
+	issues: Issue[];
+	pulls: PullRequest[];
+	/** Why gh could not answer, when it could not. */
+	github: string | null;
+	reviewOf: (file: string) => ReviewState;
+	onRefreshGithub: () => void;
+	onCommit: (message: string) => Promise<boolean>;
+	/** `dir` is what `path` is relative to: the shell's folder for the tree,
+	 *  the repository root for a change. */
+	onOpenFile: (dir: string, path: string) => void;
 	onOpenIssue: (number: number) => void;
 	onOpenPull: (number: number) => void;
 };
 
 export function SidePanel({
-	session,
-	project,
-	projectSessions,
+	cwd,
+	repo,
+	error,
+	issues,
+	pulls,
+	github,
+	reviewOf,
+	onRefreshGithub,
+	onCommit,
 	onOpenFile,
-	onOpenSession,
 	onOpenIssue,
 	onOpenPull,
 }: Props) {
@@ -93,9 +121,10 @@ export function SidePanel({
 
 	const counts: Record<View, number | undefined> = {
 		files: undefined,
-		changes: session?.files.filter((file) => file.review === "new").length,
-		issues: project?.issues.filter((issue) => issue.state === "open").length,
-		pulls: project?.pulls.filter((pull) => pull.state !== "merged").length,
+		changes: repo?.changes.filter((file) => reviewOf(file.path) === "new")
+			.length,
+		issues: issues.length,
+		pulls: pulls.length,
 	};
 
 	const label: Record<View, string> = {
@@ -106,52 +135,118 @@ export function SidePanel({
 	};
 
 	return (
-		<aside className="flex w-72 shrink-0 flex-col border-l bg-muted/30">
+		<aside className="flex min-w-0 flex-1 flex-col bg-muted/30">
 			{/* One view at a time. Stacking them would leave every list too short to
 			    read and the tree squeezed to nothing. */}
 			<nav
 				aria-label={t("session.sidePanel")}
-				className="flex shrink-0 gap-px border-b p-1"
+				className="drag-region flex h-9 shrink-0 gap-px border-b p-1"
 			>
-				{(["files", "changes", "issues", "pulls"] as const).map((value) => (
-					<button
-						key={value}
-						type="button"
-						aria-pressed={view === value}
-						onClick={() => setView(value)}
-						className={cn(
-							"flex flex-1 items-center justify-center gap-1 rounded-md px-1 py-1 text-[11px] transition-colors",
-							view === value
-								? "bg-background font-medium text-foreground shadow-xs"
-								: "text-muted-foreground hover:text-foreground",
-						)}
-					>
-						<span className="truncate">{label[value]}</span>
-						{counts[value] ? (
-							<span className="tabular-nums">{counts[value]}</span>
-						) : null}
-					</button>
-				))}
+				{(["files", "changes", "issues", "pulls"] as const).map((value) => {
+					const Icon = viewIcon[value];
+					return (
+						<button
+							key={value}
+							type="button"
+							aria-pressed={view === value}
+							aria-label={label[value]}
+							title={label[value]}
+							onClick={() => setView(value)}
+							className={cn(
+								"flex flex-1 items-center justify-center rounded-md transition-colors",
+								view === value
+									? "bg-background text-foreground shadow-xs"
+									: "text-muted-foreground hover:text-foreground",
+							)}
+						>
+							{/* The count rides the icon's corner, so a tab that wants
+							    attention says so at a glance. */}
+							<span className="relative">
+								<Icon className="size-4" />
+								{counts[value] ? (
+									<span className="-top-1.5 -right-2 absolute flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[9px] text-white tabular-nums leading-none">
+										{counts[value]}
+									</span>
+								) : null}
+							</span>
+						</button>
+					);
+				})}
 			</nav>
 
-			{view === "files" ? (
-				session ? (
-					<FileExplorer session={session} onOpenFile={onOpenFile} />
-				) : (
-					<Empty>{t("session.files.noSession")}</Empty>
-				)
+			{/* The folder every view is about, so a `cd` in the shell is visible
+			    here without reading the prompt. */}
+			{cwd && (
+				<p
+					title={cwd}
+					className="truncate border-b px-3 py-1 font-mono text-[10px] text-muted-foreground"
+				>
+					{cwd}
+				</p>
+			)}
+
+			{!cwd ? (
+				<Empty>{t("session.files.noSession")}</Empty>
+			) : error ? (
+				<Empty>{error}</Empty>
+			) : !repo ? (
+				<Empty>{t("session.files.loading")}</Empty>
+			) : view === "files" ? (
+				<FileExplorer
+					tree={repo.tree}
+					onOpen={(path) => onOpenFile(repo.cwd, path)}
+				/>
 			) : view === "changes" ? (
 				<SourceControl
-					session={session}
-					project={project}
-					projectSessions={projectSessions}
-					onOpenFile={onOpenFile}
-					onOpenSession={onOpenSession}
+					repo={repo}
+					reviewOf={reviewOf}
+					onCommit={onCommit}
+					onOpenFile={(path) => repo.root && onOpenFile(repo.root, path)}
 				/>
 			) : view === "issues" ? (
-				<IssuesView project={project} onOpen={onOpenIssue} />
+				<GithubList
+					repo={repo}
+					github={github}
+					onRefresh={onRefreshGithub}
+					empty={t("github.noIssues")}
+					items={issues.map((issue) => {
+						const Icon = issueIcon[issue.state];
+						return (
+							<Row
+								key={issue.number}
+								icon={
+									<Icon className={cn("size-3.5", issueTone[issue.state])} />
+								}
+								number={issue.number}
+								title={issue.title}
+								meta={issue.labels.join(" · ")}
+								onOpen={() => onOpenIssue(issue.number)}
+							/>
+						);
+					})}
+				/>
 			) : (
-				<PullsView project={project} onOpen={onOpenPull} />
+				<GithubList
+					repo={repo}
+					github={github}
+					onRefresh={onRefreshGithub}
+					empty={t("github.noPulls")}
+					items={pulls.map((pull) => {
+						const Icon = pullIcon[pull.state];
+						const Ci = ciIcon[pull.ci];
+						return (
+							<Row
+								key={pull.number}
+								icon={<Icon className={cn("size-3.5", pullTone[pull.state])} />}
+								number={pull.number}
+								title={pull.title}
+								meta={pull.branch}
+								trailing={<Ci className={cn("size-3", ciTone[pull.ci])} />}
+								onOpen={() => onOpenPull(pull.number)}
+							/>
+						);
+					})}
+				/>
 			)}
 		</aside>
 	);
@@ -160,23 +255,22 @@ export function SidePanel({
 // Source control the way an editor lays it out: a message box, then the state
 // of the branch, then what is checked out where, then the changes themselves.
 function SourceControl({
-	session,
-	project,
-	projectSessions,
+	repo,
+	reviewOf,
+	onCommit,
 	onOpenFile,
-	onOpenSession,
 }: {
-	session?: Session;
-	project?: Project;
-	projectSessions: Session[];
-	onOpenFile: (sessionId: string, path: string) => void;
-	onOpenSession: (sessionId: string) => void;
+	repo: RepoSnapshot;
+	reviewOf: (file: string) => ReviewState;
+	onCommit: (message: string) => Promise<boolean>;
+	onOpenFile: (path: string) => void;
 }) {
 	const { t } = useTranslation();
 	const [message, setMessage] = useState("");
+	const [busy, setBusy] = useState(false);
 	const [closed, setClosed] = useState<ReadonlySet<string>>(new Set());
 
-	if (!session) return <Empty>{t("session.files.noSession")}</Empty>;
+	if (!repo.root) return <Empty>{t("scm.notARepo")}</Empty>;
 
 	const toggle = (key: string) =>
 		setClosed((previous) => {
@@ -185,8 +279,14 @@ function SourceControl({
 			return next;
 		});
 
-	const pending = session.files.filter((file) => file.review === "new");
-	const settled = session.files.filter((file) => file.review !== "new");
+	const pending = repo.changes.filter((file) => reviewOf(file.path) === "new");
+	const settled = repo.changes.filter((file) => reviewOf(file.path) !== "new");
+
+	const commit = async () => {
+		setBusy(true);
+		if (await onCommit(message.trim())) setMessage("");
+		setBusy(false);
+	};
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
@@ -202,7 +302,8 @@ function SourceControl({
 				<Button
 					size="sm"
 					className="h-7 w-full text-xs"
-					disabled={!message.trim() || session.files.length === 0}
+					onClick={() => void commit()}
+					disabled={busy || !message.trim() || repo.changes.length === 0}
 				>
 					{t("scm.commit")}
 				</Button>
@@ -217,52 +318,44 @@ function SourceControl({
 					<div className="flex items-center gap-1.5 px-3 py-1 text-xs">
 						<GitBranch className="size-3.5 shrink-0 text-muted-foreground" />
 						<span className="min-w-0 flex-1 truncate font-mono">
-							{session.branch}
+							{repo.branch ?? t("scm.detached")}
 						</span>
 						<span className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground tabular-nums">
 							<ArrowUp className="size-3" />
-							{session.ahead}
+							{repo.ahead}
 							<ArrowDown className="size-3" />
-							{session.behind}
+							{repo.behind}
 						</span>
 					</div>
-					<p className="px-3 pb-1.5 text-[11px] text-muted-foreground">
-						{t("scm.basedOn", { branch: project?.branch })}
-					</p>
 				</Section>
 
 				{/* Which branch is checked out where is the thing a normal git GUI
 				    cannot tell you once worktrees are in play. */}
 				<Section
 					label={t("scm.worktrees")}
-					count={projectSessions.length}
+					count={repo.worktrees.length}
 					open={!closed.has("worktrees")}
 					onToggle={() => toggle("worktrees")}
 				>
 					<ul>
-						{projectSessions.map((item) => (
-							<li key={item.id}>
-								<button
-									type="button"
-									onClick={() => onOpenSession(item.id)}
-									className={cn(
-										"flex w-full items-center gap-1.5 px-3 py-1 text-left text-xs hover:bg-accent/60",
-										item.id === session.id && "bg-accent/60",
-									)}
-								>
-									<GitBranch className="size-3.5 shrink-0 text-muted-foreground" />
-									<span className="min-w-0 flex-1">
-										<span className="block truncate font-mono">
-											{item.branch}
-										</span>
-										<span className="block truncate text-[11px] text-muted-foreground">
-											{item.title}
-										</span>
+						{repo.worktrees.map((item) => (
+							<li
+								key={item.path}
+								title={item.path}
+								className={cn(
+									"flex items-center gap-1.5 px-3 py-1 text-xs",
+									item.path === repo.root && "bg-accent/60",
+								)}
+							>
+								<GitBranch className="size-3.5 shrink-0 text-muted-foreground" />
+								<span className="min-w-0 flex-1">
+									<span className="block truncate font-mono">
+										{item.branch ?? t("scm.detached")}
 									</span>
-									{item.id === session.id && (
-										<span className="size-1.5 shrink-0 rounded-full bg-sky-500" />
-									)}
-								</button>
+									<span className="block truncate text-[11px] text-muted-foreground">
+										{item.path}
+									</span>
+								</span>
 							</li>
 						))}
 					</ul>
@@ -270,11 +363,11 @@ function SourceControl({
 
 				<Section
 					label={t("scm.changes")}
-					count={session.files.length}
+					count={repo.changes.length}
 					open={!closed.has("changes")}
 					onToggle={() => toggle("changes")}
 				>
-					{session.files.length === 0 ? (
+					{repo.changes.length === 0 ? (
 						<p className="px-3 pb-2 text-[11px] text-muted-foreground">
 							{t("session.changes.empty")}
 						</p>
@@ -284,7 +377,8 @@ function SourceControl({
 								<ChangedRow
 									key={file.path}
 									file={file}
-									onOpen={() => onOpenFile(session.id, file.path)}
+									review={reviewOf(file.path)}
+									onOpen={() => onOpenFile(file.path)}
 								/>
 							))}
 
@@ -303,7 +397,8 @@ function SourceControl({
 								<ChangedRow
 									key={file.path}
 									file={file}
-									onOpen={() => onOpenFile(session.id, file.path)}
+									review={reviewOf(file.path)}
+									onOpen={() => onOpenFile(file.path)}
 								/>
 							))}
 						</ul>
@@ -311,11 +406,11 @@ function SourceControl({
 				</Section>
 			</div>
 
-			{session.files.length > 0 && (
+			{repo.changes.length > 0 && (
 				<footer className="shrink-0 border-t px-3 py-2 text-[11px] text-muted-foreground">
 					{t("session.changes.reviewedCount", {
 						done: settled.length,
-						total: session.files.length,
+						total: repo.changes.length,
 					})}
 				</footer>
 			)}
@@ -325,9 +420,11 @@ function SourceControl({
 
 function ChangedRow({
 	file,
+	review,
 	onOpen,
 }: {
-	file: Session["files"][number];
+	file: ChangedFile;
+	review: ReviewState;
 	onOpen: () => void;
 }) {
 	const name = file.path.split("/").pop() ?? file.path;
@@ -340,7 +437,7 @@ function ChangedRow({
 				onClick={onOpen}
 				className={cn(
 					"flex w-full items-baseline gap-1.5 px-3 py-1 text-left text-xs hover:bg-accent/60",
-					file.review === "reverted" && "line-through opacity-60",
+					review === "reverted" && "line-through opacity-60",
 				)}
 			>
 				<span className="min-w-0 truncate">{name}</span>
@@ -393,63 +490,45 @@ function Section({
 	);
 }
 
-function IssuesView({
-	project,
-	onOpen,
+// Issues and pull requests share a frame: a refresh, since GitHub is not
+// polled, and gh's own words when it could not answer.
+function GithubList({
+	repo,
+	github,
+	onRefresh,
+	empty,
+	items,
 }: {
-	project?: Project;
-	onOpen: (number: number) => void;
+	repo: RepoSnapshot;
+	github: string | null;
+	onRefresh: () => void;
+	empty: string;
+	items: ReactNode[];
 }) {
 	const { t } = useTranslation();
-	if (!project?.issues.length) return <Empty>{t("github.noIssues")}</Empty>;
+	if (!repo.root) return <Empty>{t("scm.notARepo")}</Empty>;
 
 	return (
-		<ul className="flex-1 overflow-auto p-1">
-			{project.issues.map((issue) => {
-				const Icon = issueIcon[issue.state];
-				return (
-					<Row
-						key={issue.number}
-						icon={<Icon className={cn("size-3.5", issueTone[issue.state])} />}
-						number={issue.number}
-						title={issue.title}
-						meta={issue.labels.join(" · ")}
-						onOpen={() => onOpen(issue.number)}
-					/>
-				);
-			})}
-		</ul>
-	);
-}
-
-function PullsView({
-	project,
-	onOpen,
-}: {
-	project?: Project;
-	onOpen: (number: number) => void;
-}) {
-	const { t } = useTranslation();
-	if (!project?.pulls.length) return <Empty>{t("github.noPulls")}</Empty>;
-
-	return (
-		<ul className="flex-1 overflow-auto p-1">
-			{project.pulls.map((pull) => {
-				const Icon = pullIcon[pull.state];
-				const Ci = ciIcon[pull.ci];
-				return (
-					<Row
-						key={pull.number}
-						icon={<Icon className={cn("size-3.5", pullTone[pull.state])} />}
-						number={pull.number}
-						title={pull.title}
-						meta={pull.branch}
-						trailing={<Ci className={cn("size-3", ciTone[pull.ci])} />}
-						onOpen={() => onOpen(pull.number)}
-					/>
-				);
-			})}
-		</ul>
+		<div className="flex min-h-0 flex-1 flex-col">
+			<div className="flex shrink-0 items-center border-b px-2 py-1">
+				<Button
+					size="sm"
+					variant="ghost"
+					onClick={onRefresh}
+					className="ml-auto h-6 gap-1 px-2 text-[11px] text-muted-foreground"
+				>
+					<RefreshCw className="size-3" />
+					{t("github.refresh")}
+				</Button>
+			</div>
+			{github ? (
+				<Empty>{github}</Empty>
+			) : items.length === 0 ? (
+				<Empty>{empty}</Empty>
+			) : (
+				<ul className="flex-1 overflow-auto p-1">{items}</ul>
+			)}
+		</div>
 	);
 }
 
@@ -497,6 +576,8 @@ function Row({
 
 function Empty({ children }: { children: ReactNode }) {
 	return (
-		<p className="flex-1 px-3 py-3 text-muted-foreground text-xs">{children}</p>
+		<p className="flex-1 whitespace-pre-wrap px-3 py-3 text-muted-foreground text-xs">
+			{children}
+		</p>
 	);
 }

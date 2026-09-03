@@ -1,12 +1,24 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 import { useTerminalSession } from "../use-terminal-session";
 
-export function TerminalPane() {
+export function TerminalPane({
+	cwd,
+	onSession,
+}: {
+	cwd: string | null;
+	/** The pty id once the shell is up, null when it is not. */
+	onSession?: (id: number | null) => void;
+}) {
 	const { t } = useTranslation();
 	const host = useRef<HTMLDivElement | null>(null);
-	const { session } = useTerminalSession(host);
+	const { session } = useTerminalSession(host, cwd);
+
+	const ptyId = session.status === "running" ? session.id : null;
+	useEffect(() => {
+		onSession?.(ptyId);
+	}, [ptyId, onSession]);
 
 	return (
 		<div className="relative min-h-0 overflow-hidden bg-black">

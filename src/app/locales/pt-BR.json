@@ -5,7 +5,9 @@
 	"window": {
 		"minimize": "Minimizar",
 		"maximize": "Maximizar",
-		"close": "Fechar"
+		"close": "Fechar",
+		"toggleSidebar": "Mostrar ou ocultar a barra lateral",
+		"togglePanel": "Mostrar ou ocultar o painel"
 	},
 	"update": {
 		"chip": {
@@ -53,27 +55,17 @@
 			"retry": "Tentar de novo",
 			"close": "Fechar",
 			"openRelease": "Abrir a página da versão"
+		},
+		"footer": {
+			"check": "Verificar atualizações",
+			"checking": "Verificando…",
+			"upToDate": "Atualizado"
 		}
 	},
 	"session": {
 		"sidebarLabel": "Sessões",
-		"needsYou": "Precisa de você",
 		"empty": "Nenhuma sessão selecionada.",
 		"changed": "{{n}} alterados",
-		"status": {
-			"waiting": "Aguardando",
-			"failed": "Falhou",
-			"done": "Pronto",
-			"running": "Em execução",
-			"idle": "Ociosa"
-		},
-		"agentPane": {
-			"placeholder": "A sessão do agente roda aqui."
-		},
-		"approve": {
-			"allow": "Permitir",
-			"deny": "Negar"
-		},
 		"changes": {
 			"reviewedDivider": "Revisados",
 			"reviewedCount": "{{done}} de {{total}} revisados",
@@ -81,15 +73,6 @@
 			"revert": "Reverter",
 			"empty": "Nada alterado ainda.",
 			"title": "Alterações"
-		},
-		"create": {
-			"title": "Nova sessão",
-			"what": "O que você vai fazer?",
-			"whatPlaceholder": "Corrigir o loop de redirecionamento",
-			"agent": "Agente",
-			"cancel": "Cancelar",
-			"start": "Começar",
-			"inProject": "Em {{project}}."
 		},
 		"files": {
 			"search": "Buscar arquivos",
@@ -100,29 +83,25 @@
 			"noSession": "Nenhuma sessão aberta.",
 			"empty": "Vazio.",
 			"byName": "Nome · {{n}}",
-			"byContent": "Conteúdo · {{n}}"
+			"byContent": "Conteúdo · {{n}}",
+			"loading": "Carregando…"
 		},
 		"pane": {
-			"empty": "Escolha uma sessão para abri-la aqui.",
 			"close": "Fechar janela",
 			"open": "{{n}} abertas"
 		},
-		"newProject": "Novo projeto",
-		"newSession": "Nova sessão neste projeto",
-		"project": {
-			"title": "Novo projeto",
-			"subtitle": "Um projeto é um repositório. As sessões são criadas dentro dele.",
-			"folder": "Pasta",
-			"name": "Nome do projeto",
+		"newSession": "Novo terminal",
+		"sidePanel": "Painel do projeto",
+		"newWorkspace": "Novo espaço de trabalho",
+		"terminalTitle": "Terminal {{n}}",
+		"removeWorkspace": "Remover espaço de trabalho",
+		"workspace": {
+			"title": "Novo espaço de trabalho",
+			"name": "Nome do espaço de trabalho",
 			"namePlaceholder": "web",
-			"group": "Grupo",
-			"groupPlaceholder": "Trabalho",
-			"add": "Adicionar",
-			"check": "Verificar",
-			"checkHint": "Aponte para um repositório git.",
-			"checking": "Verificando…"
-		},
-		"sidePanel": "Painel do projeto"
+			"cancel": "Cancelar",
+			"create": "Criar"
+		}
 	},
 	"settings": {
 		"title": "Configurações",
@@ -152,16 +131,18 @@
 			"pass": "CI passando",
 			"fail": "CI falhando",
 			"pending": "CI em execução"
-		}
+		},
+		"refresh": "Atualizar"
 	},
 	"scm": {
 		"message": "Mensagem do commit",
 		"messagePlaceholder": "Mensagem",
 		"commit": "Fazer commit",
 		"branch": "Branch",
-		"basedOn": "Baseada em {{branch}}",
 		"worktrees": "Worktrees",
-		"changes": "Alterações"
+		"changes": "Alterações",
+		"notARepo": "Não é um repositório git.",
+		"detached": "separado"
 	},
 	"terminal": {
 		"starting": "Iniciando o shell…",

@@ -5,7 +5,9 @@
 	"window": {
 		"minimize": "Свернуть",
 		"maximize": "Развернуть",
-		"close": "Закрыть"
+		"close": "Закрыть",
+		"toggleSidebar": "Показать или скрыть боковую панель",
+		"togglePanel": "Показать или скрыть панель"
 	},
 	"update": {
 		"chip": {
@@ -53,27 +55,17 @@
 			"retry": "Повторить",
 			"close": "Закрыть",
 			"openRelease": "Открыть страницу выпуска"
+		},
+		"footer": {
+			"check": "Проверить обновления",
+			"checking": "Проверка…",
+			"upToDate": "Актуальная версия"
 		}
 	},
 	"session": {
 		"sidebarLabel": "Сессии",
-		"needsYou": "Нужны вы",
 		"empty": "Сессия не выбрана.",
 		"changed": "изменено: {{n}}",
-		"status": {
-			"waiting": "Ожидание",
-			"failed": "Ошибка",
-			"done": "Готово",
-			"running": "Выполняется",
-			"idle": "Простой"
-		},
-		"agentPane": {
-			"placeholder": "Здесь будет работать сессия агента."
-		},
-		"approve": {
-			"allow": "Разрешить",
-			"deny": "Отклонить"
-		},
 		"changes": {
 			"reviewedDivider": "Просмотрено",
 			"reviewedCount": "просмотрено {{done}} из {{total}}",
@@ -81,15 +73,6 @@
 			"revert": "Откатить",
 			"empty": "Изменений пока нет.",
 			"title": "Изменения"
-		},
-		"create": {
-			"title": "Новая сессия",
-			"what": "Что вы делаете?",
-			"whatPlaceholder": "Починить цикл редиректа",
-			"agent": "Агент",
-			"cancel": "Отмена",
-			"start": "Начать",
-			"inProject": "В проекте {{project}}."
 		},
 		"files": {
 			"search": "Поиск файлов",
@@ -100,29 +83,25 @@
 			"noSession": "Нет открытых сессий.",
 			"empty": "Пусто.",
 			"byName": "Имя · {{n}}",
-			"byContent": "Содержимое · {{n}}"
+			"byContent": "Содержимое · {{n}}",
+			"loading": "Загрузка…"
 		},
 		"pane": {
-			"empty": "Выберите сессию, чтобы открыть её здесь.",
 			"close": "Закрыть окно",
 			"open": "открыто: {{n}}"
 		},
-		"newProject": "Новый проект",
-		"newSession": "Новая сессия в этом проекте",
-		"project": {
-			"title": "Новый проект",
-			"subtitle": "Проект — это репозиторий. Сессии создаются внутри него.",
-			"folder": "Папка",
-			"name": "Название проекта",
+		"newSession": "Новый терминал",
+		"sidePanel": "Панель проекта",
+		"newWorkspace": "Новое рабочее пространство",
+		"terminalTitle": "Терминал {{n}}",
+		"removeWorkspace": "Убрать рабочее пространство",
+		"workspace": {
+			"title": "Новое рабочее пространство",
+			"name": "Название рабочего пространства",
 			"namePlaceholder": "web",
-			"group": "Группа",
-			"groupPlaceholder": "Работа",
-			"add": "Добавить",
-			"check": "Проверить",
-			"checkHint": "Укажите git-репозиторий.",
-			"checking": "Проверка…"
-		},
-		"sidePanel": "Панель проекта"
+			"cancel": "Отмена",
+			"create": "Создать"
+		}
 	},
 	"settings": {
 		"title": "Настройки",
@@ -152,16 +131,18 @@
 			"pass": "CI пройден",
 			"fail": "CI упал",
 			"pending": "CI выполняется"
-		}
+		},
+		"refresh": "Обновить"
 	},
 	"scm": {
 		"message": "Сообщение коммита",
 		"messagePlaceholder": "Сообщение",
 		"commit": "Коммит",
 		"branch": "Ветка",
-		"basedOn": "На основе {{branch}}",
 		"worktrees": "Рабочие деревья",
-		"changes": "Изменения"
+		"changes": "Изменения",
+		"notARepo": "Это не git-репозиторий.",
+		"detached": "отсоединён"
 	},
 	"terminal": {
 		"starting": "Запуск оболочки…",

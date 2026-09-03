@@ -5,7 +5,9 @@
 	"window": {
 		"minimize": "最小化",
 		"maximize": "最大化",
-		"close": "关闭"
+		"close": "关闭",
+		"toggleSidebar": "切换侧边栏",
+		"togglePanel": "切换面板"
 	},
 	"update": {
 		"chip": {
@@ -53,27 +55,17 @@
 			"retry": "重试",
 			"close": "关闭",
 			"openRelease": "打开发布页"
+		},
+		"footer": {
+			"check": "检查更新",
+			"checking": "检查中…",
+			"upToDate": "已是最新版本"
 		}
 	},
 	"session": {
 		"sidebarLabel": "会话",
-		"needsYou": "待处理",
 		"empty": "未选择会话。",
 		"changed": "{{n}} 个变更",
-		"status": {
-			"waiting": "等待中",
-			"failed": "失败",
-			"done": "完成",
-			"running": "运行中",
-			"idle": "空闲"
-		},
-		"agentPane": {
-			"placeholder": "智能体会话将在此运行。"
-		},
-		"approve": {
-			"allow": "允许",
-			"deny": "拒绝"
-		},
 		"changes": {
 			"reviewedDivider": "已审查",
 			"reviewedCount": "已审查 {{done}} / {{total}}",
@@ -81,15 +73,6 @@
 			"revert": "撤销",
 			"empty": "暂无变更。",
 			"title": "变更"
-		},
-		"create": {
-			"title": "新建会话",
-			"what": "要做什么?",
-			"whatPlaceholder": "修复重定向循环",
-			"agent": "智能体",
-			"cancel": "取消",
-			"start": "开始",
-			"inProject": "创建于 {{project}}。"
 		},
 		"files": {
 			"search": "搜索文件",
@@ -100,29 +83,25 @@
 			"noSession": "没有打开的会话。",
 			"empty": "空。",
 			"byName": "名称 · {{n}}",
-			"byContent": "内容 · {{n}}"
+			"byContent": "内容 · {{n}}",
+			"loading": "加载中…"
 		},
 		"pane": {
-			"empty": "选择一个会话即可在此打开。",
 			"close": "关闭窗口",
 			"open": "已打开 {{n}} 个"
 		},
-		"newProject": "新建项目",
-		"newSession": "在此项目中新建会话",
-		"project": {
-			"title": "新建项目",
-			"subtitle": "项目就是仓库，会话在项目内创建。",
-			"folder": "文件夹",
-			"name": "项目名称",
+		"newSession": "新建终端",
+		"sidePanel": "项目面板",
+		"newWorkspace": "新建工作区",
+		"terminalTitle": "终端 {{n}}",
+		"removeWorkspace": "移除工作区",
+		"workspace": {
+			"title": "新建工作区",
+			"name": "工作区名称",
 			"namePlaceholder": "web",
-			"group": "分组",
-			"groupPlaceholder": "工作",
-			"add": "添加",
-			"check": "检查",
-			"checkHint": "指向一个 git 仓库。",
-			"checking": "检查中…"
-		},
-		"sidePanel": "项目面板"
+			"cancel": "取消",
+			"create": "创建"
+		}
 	},
 	"settings": {
 		"title": "设置",
@@ -152,16 +131,18 @@
 			"pass": "CI 通过",
 			"fail": "CI 失败",
 			"pending": "CI 运行中"
-		}
+		},
+		"refresh": "刷新"
 	},
 	"scm": {
 		"message": "提交信息",
 		"messagePlaceholder": "信息",
 		"commit": "提交",
 		"branch": "分支",
-		"basedOn": "基于 {{branch}}",
 		"worktrees": "工作树",
-		"changes": "更改"
+		"changes": "更改",
+		"notARepo": "不是 git 仓库。",
+		"detached": "分离"
 	},
 	"terminal": {
 		"starting": "正在启动 shell…",
